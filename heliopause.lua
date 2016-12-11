@@ -20,18 +20,44 @@
 
 function split_number_string(s)
   local t = {}
-  local start_index = 1
+  local ti = split_number_string_start_index
+  local substr_start_index = 1
   for i=1,#s do
     if sub(s,i,i) == " " then
-      add(t, sub(s, start_index, i-1)+0)
+      t[ti] = sub(s, substr_start_index, i-1)+0
       -- print(t[#t])
-      start_index = i+1
+      ti = ti + 1
+      substr_start_index = i+1
     end
   end
   return t
 end
 
+split_number_string_start_index = 0
+
+-- Gradients for 2D, 3D case --
+local Grads3 = {
+  split_number_string "-1 1 0 ",
+  split_number_string "1 -1 0 ",
+  split_number_string "-1 -1 0 ",
+  split_number_string "1 0 1 ",
+  split_number_string "-1 0 1 ",
+  split_number_string "1 0 -1 ",
+  split_number_string "-1 0 -1 ",
+  split_number_string "0 1 1 ",
+  split_number_string "0 -1 1 ",
+  split_number_string "0 1 -1 ",
+  split_number_string "0 -1 -1 "
+}
+Grads3[0] = split_number_string "1 1 0 "
+
+-- for K,V in pairs(Grads3[1]) do
+--   print("K: "..K.."  V:"..V)
+-- end
 -- while(true) do end
+
+split_number_string_start_index = 1
+
 damage_colors = split_number_string "7 10 9 8 5 0 "
 damage_colors2 = split_number_string "7 10 9 8 5 0 7 10 9 8 5 0 7 10 9 8 5 0 "
 
@@ -46,11 +72,7 @@ star_colors = {
   split_number_string "5 1 ",  -- monochrome darker
 }
 
--- 7402
--- darkshipcolors = {0, 1, 2, 2, 1, 5, 6, 2, 4, 9, 3, 13, 1, 8, 9}
 darkshipcolors = split_number_string "0 1 2 2 1 5 6 2 4 9 3 13 1 8 9 "
-
--- darkershipcolors = {0, 0, 1, 1, 0, 1, 5, 1, 2, 4, 2, 1, 0, 2, 4}
 
 dark_planet_colors = split_number_string "0 0 1 1 0 5 5 5 4 5 5 3 1 1 2 1 "
 
@@ -85,8 +107,9 @@ function random_plus_to_minus_one()
   return random_int(3)-1
 end
 
-function random_int(n)
-  return flr(rnd(32767))%n
+function random_int(n, minimum)
+  local m = minimum or 0
+  return flr(rnd(32767))%(n-m) + m
 end
 
 function random_angle()
@@ -157,6 +180,7 @@ end
 function Vector:add(v)
   self.x = self.x + v.x
   self.y = self.y + v.y
+  -- self = self + v
   return self
 end
 
@@ -218,7 +242,7 @@ function Vector:length()
 end
 
 function Vector:scaled_length()
-  -- divided by 182 to prevent overflow
+  -- divided by 182 to prevent overflow - looses some percision
   return sqrt((self.x/182)^2 + (self.y/182)^2)*182
 end
 
@@ -296,27 +320,22 @@ end
 -- start pixel height,
 -- slope1, slope2, slope3,
 -- slope2 start x coord %, slope3 start x coord %
+-- min length, max length
 ship_types = {
   { name = "cruiser",
-    -- min_size = 18,
-    -- max_size = 38,
-    shape = split_number_string "3.5 .5 0 -1 .583333 .8125 "
+    shape = split_number_string "3.5 .5 0 -1 .583333 .8125 18 24 "
   },
   { name = "freighter",
-    -- min_size = 18,
-    -- max_size = 38,
-    shape = split_number_string "3 2 0 -3 .2125 .8125 "
+    shape = split_number_string "3 2 0 -3 .2125 .8125 16 22 "
   },
   { name = "fighter",
-    -- min_size = 14,
-    -- max_size = 20,
-    shape = split_number_string "1.5 .25 .75 -2 .7 .8 "
+    shape = split_number_string "1.5 .25 .75 -2 .7 .8 14 18 "
   }
 }
 
 function Ship:generate_random_ship(size, seed, shiptype)
   self.ship_type = shiptype or ship_types[random_int(#ship_types)+1]
-  -- self.ship_type = ship_types[2]
+  local ship_type_shape = self.ship_type.shape
 
   local seed_value = seed or rnd()
   srand(seed_value)
@@ -327,21 +346,20 @@ function Ship:generate_random_ship(size, seed, shiptype)
     add(ship_colors, i)
   end
   for i=1,6 do
-    del(ship_colors, random_int(10)+6)
+    del(ship_colors, random_int(16,6))
   end
 
-  self.hp = 0
-  self.sprite = nil
+  local hp = 0
   local ship_mask = {}
-  local rows = size or 16
-  self.length = rows
+  local rows = size or random_int(ship_type_shape[8]+1, ship_type_shape[7])
   local columns = flr(rows/2)
-  local s1 = Vector(1, self.ship_type.shape[1])
-  local s2 = Vector(1, self.ship_type.shape[2])
-  local s3 = Vector(1, self.ship_type.shape[3])
-  local s4 = Vector(1, self.ship_type.shape[4])
-  local y2 = flr( self.ship_type.shape[5] * rows)  -- 2nd x
-  local y3 = flr( self.ship_type.shape[6] * rows) -- 3rd x
+
+  local s1 = Vector(1, ship_type_shape[1])
+  local s2 = Vector(1, ship_type_shape[2])
+  local s3 = Vector(1, ship_type_shape[3])
+  local s4 = Vector(1, ship_type_shape[4])
+  local y2 = flr( ship_type_shape[5] * rows)  -- 2nd x
+  local y3 = flr( ship_type_shape[6] * rows) -- 3rd x
 
   for y=1,rows do
     add(ship_mask, {})
@@ -351,15 +369,16 @@ function Ship:generate_random_ship(size, seed, shiptype)
     end
   end
 
-  local last = s1
-  local cv = s2
+  local last_slope = s1
+  local current_slope = s2
   local thirdy = round(rows/3)
   local thirdx = round(columns/4)
+
   for y=2,rows-1 do
     for x=1,columns do
-      -- print(cv:tostring().." "..last.y)
       -- get current bright color
       local color = ship_colors[1]
+
       -- set color based on part of the ship
       if y >= thirdy+random_plus_to_minus_one() and
          y <= 2*thirdy+random_plus_to_minus_one() then
@@ -370,36 +389,31 @@ function Ship:generate_random_ship(size, seed, shiptype)
         color = ship_colors[2]
       end
 
-      if columns-x < max(0,flr(last.y)) then
+      if columns-x < max(0,flr(last_slope.y)) then
         if rnd() < .6 then
           -- set bright color
           ship_mask[y][x] = color
-          self.hp = self.hp + 1
+          hp = hp + 1
           -- if above pixel is transparent, shade darker
           if ship_mask[y-1][x] == ship_colors[4] then
             ship_mask[y][x] = darkshipcolors[color]
           end
         end
-
-        -- if ship_mask[y][x-1] == ship_colors[4] and
-        --   ship_mask[y-1][x-1] == ship_colors[4] and
-        -- ship_mask[y][x] == ship_colors[4] then
-        --   ship_mask[y][x] = 15
-        -- end
-
       end
     end
+
     if y>=y3 then
-      cv = s4
+      current_slope = s4
     elseif y>=y2 then
-      cv = s3
+      current_slope = s3
     end
-    last=last+cv
+
+    last_slope = last_slope + current_slope
     -- add a dark gray ship spine
-    if last.y > 0 and y>3 and y<rows-1 then
-      for i=1,random_int(round(last.y/4)+1) do
+    if last_slope.y > 0 and y>3 and y<rows-1 then
+      for i=1,random_int(round(last_slope.y/4)+1) do
         ship_mask[y][columns-i] = 5
-        self.hp = self.hp + 2
+        hp = hp + 2
       end
     end
   end
@@ -410,18 +424,19 @@ function Ship:generate_random_ship(size, seed, shiptype)
   --   end
   -- end
 
-  self.sprite_has_odd_columns = random_int(2) -- 0 or 1
-
+  -- mirror ship colors
+  local sprite_has_odd_columns = random_int(2) -- 0 or 1
   for y=rows,1,-1 do
-    for x=columns-self.sprite_has_odd_columns,1,-1 do
+    for x=columns-sprite_has_odd_columns,1,-1 do
       add(ship_mask[y], ship_mask[y][x])
     end
   end
-  -- self.hp = self.hp * 2
-  self.max_hp = self.hp
+
+  self.hp = hp
+  self.max_hp = hp
   self.hp_percent = 1
 
-  self.sprite_rows = #ship_mask
+  self.sprite_rows = rows
   self.sprite_columns = #ship_mask[1]
   self.transparent_color = ship_colors[4]
   self.sprite = ship_mask
@@ -497,12 +512,17 @@ function takeoff()
 end
 
 function Ship:set_position_near_object(object)
-  local radius = object.radius or object.length
+  local radius = object.radius or object.sprite_rows
   self.sector_position = (random_angle() * 1.2*radius) + object.sector_position
   self:reset_velocity()
 end
 
-function clear_targeted_ship()
+function Ship:clear_target()
+  self.target_index = nil
+  self.target = nil
+end
+
+function clear_targeted_ship_flags()
   for ship in all(npcships) do
     ship.targeted = false
   end
@@ -510,22 +530,23 @@ end
 
 function next_hostile_target()
   local hostile
-  while (not hostile) do
+  for i=1,#npcships do
     next_ship_target()
-    hostile = npcships[playership.target_index].hostile
+    if playership.target.hostile then break end
   end
   return true
 end
 
 function next_ship_target()
-  clear_targeted_ship()
+  clear_targeted_ship_flags()
   playership.target_index = (playership.target_index or #npcships)%#npcships + 1
-  npcships[playership.target_index].targeted = true
+  playership.target = npcships[playership.target_index]
+  playership.target.targeted = true
   return true -- keep paused
 end
 
 function next_object_target()
-  clear_targeted_ship()
+  clear_targeted_ship_flags()
   return true -- keep paused
 end
 
@@ -677,8 +698,9 @@ end
 -- clipped_speed=0
 function Ship:draw()
 
-  print_shadowed("cpu:"..stat(1), 100, 107)
-  print_shadowed("ram:"..stat(0), 100, 114)
+  -- print_shadowed("cpu:"..stat(1), 100, 107)
+  -- print_shadowed("ram:"..stat(0), 100, 114)
+
   -- print_shadowed("heading: "..format_float(self.heading), 0, 7)
   local hp_color = 11
   if self.hp_percent <= .3 then hp_color = 9 end
@@ -711,14 +733,14 @@ function Ship:draw()
   -- print_shadowed("vel: "..self.velocity.." dv: "..self.deltav, 0, 78)
   local player_screen_position = self.screen_position
 
-  local targeted_ship = npcships[self.target_index]
+  local targeted_ship = self.target
   if targeted_ship then
     if not targeted_ship:is_visible(self.sector_position) then
       local d = (targeted_ship.screen_position/182 - player_screen_position/182):normalize()
       -- print_shadowed("order: "..#targeted_ship.orders.." "..co, 0, 85)
       -- self.screen_position:draw_line(targeted_ship.screen_position,7)
-      local p1 = d*(self.length/2+4) + player_screen_position
-      local p2 = d*(self.length/2+14) + player_screen_position
+      local p1 = d*(self.sprite_rows/2+4) + player_screen_position
+      local p2 = d*(self.sprite_rows/2+14) + player_screen_position
       local color, shadow = targeted_ship:targeted_color()
       p1:draw_line(p2, color)
       local distance = format_float((targeted_ship.screen_position - player_screen_position):scaled_length())
@@ -738,11 +760,11 @@ function Ship:draw()
 end
 
 function Ship:hp_string()
-  return "hp: "..self.hp.."/"..self.max_hp.." "..100*self.hp_percent.."%"
+  return "hp: "..self.hp.."/"..self.max_hp.." "..round(100*self.hp_percent).."%"
 end
 
 function Ship:is_visible(player_ship_pos)
-  local size = self.length
+  local size = self.sprite_rows
   local screen_position = (self.sector_position - player_ship_pos + screen_center):round()
   self.screen_position = screen_position
   return screen_position.x < 128 + size and
@@ -797,7 +819,7 @@ end
 
 function Ship:seek()
   if self.seektime%20 == 0 then
-    self:set_destination(npcships[self.target_index] or playership)
+    self:set_destination(self.target or playership)
   end
   self.seektime = self.seektime + 1
 
@@ -896,7 +918,7 @@ end
 
 function Ship:fire_weapon(weapon)
   local weapon_velocity = Vector(1):rotate(self.angle_radians)
-  local hardpoint_location = weapon_velocity * (self.length/2) + self.screen_position
+  local hardpoint_location = weapon_velocity * (self.sprite_rows/2) + self.screen_position
   if framecount%3==0 then
     add(projectiles,
         MultiCannon.new(
@@ -904,7 +926,7 @@ function Ship:fire_weapon(weapon)
           weapon_velocity*6 + self.velocity_vector,
           12,
           self))
-    sfx(0)
+    -- sfx(0)
   end
 end
 
@@ -920,6 +942,7 @@ function Ship:apply_thrust(max_velocity)
   if max_velocity and dv > max_velocity then
     dv = max_velocity
   end
+  -- cut thrust if less than 10%
   if self.hp_percent < .15+rnd(.1)-.05 then
     dv = 0
   end
@@ -941,14 +964,14 @@ function Ship:apply_thrust(max_velocity)
   self.velocity_angle = velocity_vector:angle()
   self.velocity_angle_opposite = (self.velocity_angle + 0.5)%1
 
-  local engine_location = Vector(1):rotate(a) * -(self.length/2) + self.screen_position
+  local engine_location = Vector(1):rotate(a) * -(self.sprite_rows/2) + self.screen_position
   if velocity < .05 then
     velocity = 0.0
     velocity_vector = Vector()
   else
     add(particles,
         ThrustExhaust.new(engine_location,
-                          additional_velocity_vector*-1.3*self.length))
+                          additional_velocity_vector*-1.3*self.sprite_rows))
   end
 
   self.velocity = velocity
@@ -996,7 +1019,7 @@ Sun = {}
 Sun.__index = Sun
 function Sun.new(radius, x, y)
   local r = radius or 64+random_int(128)
-  local c = random_int(5)+1
+  local c = random_int(6,1)
   return setmetatable(
     { screen_position = Vector(),
       radius          = r,
@@ -1153,7 +1176,8 @@ function MultiCannon.new(p, pv, c, firing_ship)
       particle_velocity = pv + deflection,
       color = c,
       ship = firing_ship,
-      duration = 256 }, MultiCannon)
+      duration = 256
+    }, MultiCannon)
 end
 function MultiCannon:draw(ship_velocity)
   -- find position2 slightly behind self.position by 2 or 3 pixels
@@ -1173,7 +1197,8 @@ function Spark.new(p, pv, c, d)
     { position = p,
       particle_velocity = pv,
       color = c,
-      duration = d or random_int(5)+2 }, Spark)
+      duration = d or random_int(7,2)
+    }, Spark)
 end
 function Spark:update(ship_velocity)
   self.position:add(self.particle_velocity - ship_velocity)
@@ -1192,7 +1217,8 @@ function Circle.new(p, pv, c, d, center)
       particle_velocity = pv,
       color = c,
       center_position = center or p:clone(),
-      duration = d }, Circle)
+      duration = d
+    }, Circle)
 end
 function Circle:draw(ship_velocity)
   -- self.center_position:draw_line(self.position, self.color)
@@ -1216,13 +1242,14 @@ function ThrustExhaust.new(p, pv)
       duration = 0 }, ThrustExhaust)
 end
 function ThrustExhaust:draw(ship_velocity)
-  local c = 9+random_int(2)
-  local deflection = self.particle_velocity:perpendicular() * 0.7
-  local flicker = (self.particle_velocity * (rnd(2)+2)) + (deflection * (rnd()-.5))
+  local c = random_int(11,9)
+  local pv = self.particle_velocity
+  local deflection = pv:perpendicular() * 0.7
+  local flicker = (pv * (rnd(2)+2)) + (deflection * (rnd()-.5))
 
   local p0 = self.position + flicker
-  local p1 = self.position + self.particle_velocity + deflection
-  local p2 = self.position + self.particle_velocity + deflection*-1
+  local p1 = self.position + pv + deflection
+  local p2 = self.position + pv + deflection*-1
   local p3 = self.position
   p1:draw_line(p0,c)
   p2:draw_line(p0,c)
@@ -1233,7 +1260,7 @@ function ThrustExhaust:draw(ship_velocity)
     add(particles, Spark.new(p0,ship_velocity+(flicker*.25),c))
   end
 
-  self.position:add(self.particle_velocity - ship_velocity)
+  self.position:add(pv - ship_velocity)
   self.duration = self.duration - 1
 end
 
@@ -1327,21 +1354,6 @@ local perms12 = {}
 for i = 0, 255 do
   local x = perms[i] % 12
   perms[i + 256], perms12[i], perms12[i + 256] = perms[i], x, x
-end
-
--- Gradients for 2D, 3D case --
-local Grads3 = {
-  { 1, 1, 0 }, { -1, 1, 0 }, { 1, -1, 0 }, { -1, -1, 0 },
-  { 1, 0, 1 }, { -1, 0, 1 }, { 1, 0, -1 }, { -1, 0, -1 },
-  { 0, 1, 1 }, { 0, -1, 1 }, { 0, 1, -1 }, { 0, -1, -1 }
-}
-for row in all(Grads3) do
-  for i=0,2 do
-    row[i]=row[i+1]
-  end
-end
-for i=0,11 do
-  Grads3[i]=Grads3[i+1]
 end
 
 -- 3D weight contribution
@@ -1512,7 +1524,7 @@ function Planet.new(x, y, phase, r)
   end
 
   local min_size = planet_type.min_size or 10
-  local radius = r or min_size+random_int(64-min_size)+1
+  local radius = r or random_int(65, min_size)
   return setmetatable(
     { screen_position    = Vector(),
       radius             = radius,
@@ -1655,9 +1667,12 @@ end
 
 function add_npc(p)
   local position = p or playership
-  local npc = Ship.new(2,4):generate_random_ship(12+random_int(8))
+  local npc = Ship.new(2,4):generate_random_ship()
   npc:set_position_near_object(position)
   npc.npc = true
+  if npc.ship_type.name ~= "freighter" and rnd() < .2 then
+    npc.hostile = true
+  end
   add(npcships, npc)
 end
 
@@ -1671,13 +1686,13 @@ function load_sector()
   add(thissector.planets, Sun.new())
   -- end
 
-  for i=0,1+random_int(12) do -- planet count
+  for i=0,random_int(12) do -- planet count
     add(thissector.planets, thissector:new_planet_along_elipse())
   end
 
   -- drop the ship near the border of the first planet
   playership:set_position_near_object(thissector.planets[2])
-  playership.target_index = nil
+  playership:clear_target()
 
   npcships = {}
   for p in all(thissector.planets) do
@@ -1685,7 +1700,6 @@ function load_sector()
       add_npc(p)
     end
   end
-  npcships[1].hostile = true
 
   -- insert test planet
   -- add(thissector.planets, Planet.new(playership.sector_position.x+63,playership.sector_position.y+63, .6, 32))
@@ -1734,11 +1748,13 @@ function draw_minimap_planet(object)
 end
 
 function draw_minimap_ship(object)
-  local point = (object.sector_position/minimap_denominator):add(minimap_offset)
+  local point = (object.sector_position/minimap_denominator):add(minimap_offset):round()
   if object.npc then
     point:draw_point(object:targeted_color())
+    if object.targeted then
+      circ(point.x, point.y, 2, object:targeted_color())
+    end
   else
-    point:round()
     rect(point.x-1,point.y-1,point.x+1,point.y+1, 15)
   end
 end
@@ -2157,7 +2173,7 @@ function _update()
             add(ship.orders, ship.seek)
           else
             ship:approach_object()
-            ship.wait_duration = 11+random_int(50)
+            ship.wait_duration = random_int(46, 10)
             ship.wait_time = secondcount
             add(ship.orders, ship.wait)
           end
@@ -2174,7 +2190,7 @@ function _update()
       ship:update_location()
       if ship.hp < 1 then
         del(npcships, ship)
-        playership.target_index = false
+        playership:clear_target()
       end
     end
 
