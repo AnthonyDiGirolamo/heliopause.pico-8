@@ -31,11 +31,11 @@
 - [ ] Sound Effects
 - [ ] Music
 - [ ] Title screen
-- [ ] More token optimization
+- [ ] Token optimization
 - [ ] More planet types
 - [ ] Inventory with items and more weapons
 - [ ] Shipyards?
 - [ ] Save games?
 - [ ] Story?
 
-I'm looking for help with any of the above! Let me know if you'd like to help!
+I'm looking for help with any of the above, let me know if you'd like to contribute! The game currently uses 7188/8192 tokens but most of the above should fit.
