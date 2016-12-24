@@ -30,8 +30,10 @@
 - [ ] Better AI
 - [ ] Sound Effects
 - [ ] Music
-- [ ] Title screen
-- [ ] Token optimization
+- [x] Title screen [(courtesy of EatMoreCheese)](http://www.lexaloffle.com/bbs/?pid=33820#p33820)
+- [x] Homing missiles
+- [x] Offscreen targeting and missile impacts
+- [ ] Better token optimization
 - [ ] More planet types
 - [ ] Inventory with items and more weapons
 - [ ] Shipyards?
