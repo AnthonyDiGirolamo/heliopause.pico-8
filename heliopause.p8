@@ -4,23 +4,6 @@ __lua__
 -- heliopause
 -- by anthonydigirolamo
 
--- black       = 0
--- dark_blue   = 1
--- dark_purple = 2
--- dark_green  = 3
--- brown       = 4
--- dark_gray   = 5
--- light_gray  = 6
--- white       = 7
--- red         = 8
--- orange      = 9
--- yellow      = 10
--- green       = 11
--- blue        = 12
--- indigo      = 13
--- pink        = 14
--- peach       = 15
-
 function split_number_string(s)
   local t = {}
   local ti = split_number_string_start_index
@@ -28,7 +11,6 @@ function split_number_string(s)
   for i=1,#s do
     if sub(s,i,i) == " " then
       t[ti] = sub(s, substr_start_index, i-1)+0
-      -- print(t[#t])
       ti += 1
       substr_start_index = i+1
     end
@@ -38,7 +20,6 @@ end
 
 split_number_string_start_index = 0
 
--- Gradients for 2D, 3D case --
 local Grads3 = {
   split_number_string "-1 1 0 ",
   split_number_string "1 -1 0 ",
@@ -53,11 +34,6 @@ local Grads3 = {
   split_number_string "0 -1 -1 "
 }
 Grads3[0] = split_number_string "1 1 0 "
-
--- for K,V in pairs(Grads3[1]) do
---   print("K: "..K.."  V:"..V)
--- end
--- while(true) do end
 
 split_number_string_start_index = 1
 
@@ -79,25 +55,6 @@ darkshipcolors = split_number_string "0 1 2 2 1 5 6 2 4 9 3 13 1 8 9 "
 
 dark_planet_colors = split_number_string "0 0 1 1 0 5 5 5 4 5 5 3 1 1 2 1 "
 
--- dark_planet_colors = {
---   0,  -- black       = 0
---   0,  -- dark_blue   = 1
---   1,  -- dark_purple = 2
---   1,  -- dark_green  = 3
---   0,  -- brown       = 4
---   5,  -- dark_gray   = 5
---   5,  -- light_gray  = 6
---   5,  -- white       = 7
---   4,  -- red         = 8
---   5,  -- orange      = 9
---   5,  -- yellow      = 10
---   3,  -- green       = 11
---   1,  -- blue        = 12
---   1,  -- indigo      = 13
---   2,  -- pink        = 14
---   13  -- peach       = 15
--- }
-
 function round(i)
    return flr(i+.5)
 end
@@ -113,10 +70,6 @@ end
 function random_int(n, minimum)
   local m = minimum or 0
   return flr(rnd(32767))%(n-m) + m
-end
-
-function random_angle()
-  return Vector(1):rotate(rnd())
 end
 
 function format_float(n)
@@ -143,6 +96,16 @@ function Vector:draw_line(v, color)
        color)
 end
 
+function Vector:draw_circle(radius, color, filled)
+  local circle_method = circ
+  if filled then circle_method = circfill end
+  circle_method(
+    round(self.x),
+    round(self.y),
+    round(radius),
+    color)
+end
+
 -- function Vector:floor()
 --   self.x = flr(self.x)
 --   self.y = flr(self.y)
@@ -164,6 +127,14 @@ function Vector:normalize()
   self.x /= len
   self.y /= len
   return self
+end
+
+function random_angle(length)
+  return rotated_vector(rnd(), length)
+end
+
+function rotated_vector(angle, x, y)
+  return Vector(x or 1, y):rotate(angle)
 end
 
 function Vector:rotate(phi)
@@ -253,9 +224,9 @@ function Vector.distance(a, b)
   return (b - a):length()
 end
 
--- function Vector:tostring()
---   return format_float(self.x) .. ", " .. format_float(self.y)
--- end
+function Vector:tostring()
+  return format_float(self.x) .. ", " .. format_float(self.y)
+end
 
 function Vector:clone()
   return Vector.new(self.x, self.y)
@@ -312,7 +283,9 @@ function Ship.new(
     velocity = 0,
     velocity_vector = Vector(),
 
-    orders = {}
+    orders = {},
+
+    last_fire_time = 0
   }
   shp.deltav = 9.806 * shp.gees / 300 -- 30fps * scaling factor
   setmetatable(shp,Ship)
@@ -471,6 +444,7 @@ end
 --     end
 --   end
 -- end
+
 function nearest_planet()
   local closest_planet
   local shortest_distance = 32767
@@ -516,7 +490,7 @@ end
 
 function Ship:set_position_near_object(object)
   local radius = object.radius or object.sprite_rows
-  self.sector_position = (random_angle() * 1.2*radius) + object.sector_position
+  self.sector_position = random_angle(1.2*radius) + object.sector_position
   self:reset_velocity()
 end
 
@@ -531,25 +505,31 @@ function clear_targeted_ship_flags()
   end
 end
 
-function next_hostile_target()
+function next_hostile_target(ship)
+  local targeting_ship = ship or playership
   local hostile
   for i=1,#npcships do
-    next_ship_target()
-    if playership.target.hostile then break end
+    next_ship_target(ship)
+    if targeting_ship.target.hostile then break end
   end
   return true
 end
 
-function next_ship_target()
-  clear_targeted_ship_flags()
-  playership.target_index = (playership.target_index or #npcships)%#npcships + 1
-  playership.target = npcships[playership.target_index]
-  playership.target.targeted = true
-  return true -- keep paused
-end
-
-function next_object_target()
-  clear_targeted_ship_flags()
+function next_ship_target(ship, random)
+  local targeting_ship = ship or playership
+  if random then
+    targeting_ship.target_index = random_int(#npcships)+1
+  else
+    targeting_ship.target_index = (targeting_ship.target_index or #npcships)%#npcships + 1
+  end
+  targeting_ship.target = npcships[targeting_ship.target_index]
+  if targeting_ship == targeting_ship.target then
+    targeting_ship.target = playership
+  end
+  if not ship then
+    clear_targeted_ship_flags()
+    targeting_ship.target.targeted = true
+  end
   return true -- keep paused
 end
 
@@ -561,32 +541,32 @@ function Ship:targeted_color()
   end
 end
 
-function Ship:draw_sprite_rotated()
+function Ship:draw_sprite_rotated(offscreen_pos)
   -- self.shadow_angle = self.sector_position:angle()
 
-  local screen_position = self.screen_position
+  local screen_position = offscreen_pos or self.screen_position
   local a       = self.angle_radians
   local rows    = self.sprite_rows
   local columns = self.sprite_columns
   local tcolor  = self.transparent_color
 
   if self.targeted then
-    circ(
-      screen_position.x,
-      screen_position.y,
-      rows,
-    -- rect(
-    --   screen_position.x-rows,
-    --   screen_position.y-rows,
-    --   screen_position.x+rows,
-    --   screen_position.y+rows,
-      self:targeted_color())
+    local targetcircle_radius = round(rows/2)+4
+    local circlecolor, circleshadow = self:targeted_color()
+    if offscreen_pos then
+      (screen_position+Vector(1,1)):draw_circle(targetcircle_radius, circleshadow, true)
+      screen_position:draw_circle(targetcircle_radius, 0, true)
+    end
+    screen_position:draw_circle(targetcircle_radius, circlecolor)
   end
 
   local close_projectiles = {}
   for projectile in all(projectiles) do
-    if Vector.distance(projectile.position, screen_position) < rows then
-      add(close_projectiles, projectile)
+    if projectile.firing_ship ~= self then
+      if (projectile.sector_position and offscreen_pos and (self.sector_position - projectile.sector_position):scaled_length() <= rows) or
+      Vector.distance(projectile.screen_position, screen_position) < rows then
+        add(close_projectiles, projectile)
+      end
     end
   end
 
@@ -611,51 +591,60 @@ function Ship:draw_sprite_rotated()
 
         if self.hp < 1 then
           -- explode
-          local explosion_direction = random_angle()
-          add(particles,
-              Circle.new(
-                pixel1,
-                explosion_direction*rnd(.5),--*(rnd()+.5),
-                color,
-                #damage_colors2-3,
-                explosion_direction * rows * .5 + pixel1
-          ))
-          add(particles,
-              Spark.new(
-                pixel1,
-                random_angle()*(rnd(.25)+.25),
-                color,
-                128))
+          make_explosion(pixel1, rows/2)
+          if not offscreen_pos then
+            add(particles,
+                Spark.new(
+                  pixel1,
+                  random_angle(rnd(.25)+.25)+self.velocity_vector,
+                  color,
+                  128 + random_int(32)))
+          end
         else
 
           for projectile in all(close_projectiles) do
-            if projectile.ship ~= self and
-            (pixel1:about_equals(projectile.position) or pixel1:about_equals(projectile.position2)) then
-              projectile_hit_by = projectile.ship
+            -- tokens 7610
+            local impact = false
+
+            if not offscreen_pos
+              -- and projectile.firing_ship ~= self
+              and (pixel1:about_equals(projectile.screen_position)
+                   or (projectile.position2 and pixel1:about_equals(projectile.position2))) then
+              impact = true
+            elseif offscreen_pos
+              and projectile.last_offscreen_pos
+              and pixel1:about_equals(projectile.last_offscreen_pos) then
+              impact = true
+            end
+
+            if impact then
+              projectile_hit_by = projectile.firing_ship
+              local damage = projectile.damage or 1
+              self.hp -= damage
+              if damage > 10 then make_explosion(pixel1) end
+              self.hp_percent = self.hp/self.max_hp
               add(particles,
                   Circle.new(
                     pixel1,
                     random_angle(),
                     color,
-                    #damage_colors-3
-                  )
+                    #damage_colors-3)
               )
               if rnd() < .5 then
                 add(particles,
                     Spark.new(
                       pixel1,
-                      random_angle()*(2*rnd()+1),
+                      random_angle(2*rnd()+1)+self.velocity_vector,
                       color,
                       128)
                 )
               end
-              self.hp -= 1
-              self.hp_percent = self.hp/self.max_hp
               del(projectiles, projectile)
               color = -random_int(#damage_colors)
               break
             end
           end
+
           -- damaged pixel
           if color <= 0 then
             if -color < #damage_colors  then
@@ -697,12 +686,10 @@ function Ship:rotate(signed_degrees) -- +1 or -1
   self.heading = (450-self.angle)%360 -- (360-self.angle+90)%360
 end
 
--- ramped_speed=0
--- clipped_speed=0
 function Ship:draw()
-
-  -- print_shadowed("cpu:"..stat(1), 100, 107)
-  -- print_shadowed("ram:"..stat(0), 100, 114)
+  print_shadowed("prj:"..#projectiles, 100, 100)
+  print_shadowed("cpu:"..stat(1), 100, 107)
+  print_shadowed("ram:"..stat(0), 100, 114)
 
   -- print_shadowed("heading: "..format_float(self.heading), 0, 7)
   local hp_color = 11
@@ -710,7 +697,7 @@ function Ship:draw()
   if self.hp_percent <= .1 then hp_color = 8 end
   print_shadowed(self:hp_string(), 0, 0, hp_color, darkshipcolors[hp_color])
 
-  print_shadowed(10*self.velocity.." pixels/s", 0, 7)
+  print_shadowed(10*self.velocity.." pixels/sec", 0, 7)
   if self.accelerating then
     print_shadowed(self.current_gees.."gS", 0, 14)
   end
@@ -734,32 +721,10 @@ function Ship:draw()
   -- end
 
   -- print_shadowed("vel: "..self.velocity.." dv: "..self.deltav, 0, 78)
-  local player_screen_position = self.screen_position
-
-  local targeted_ship = self.target
-  if targeted_ship then
-    if not targeted_ship:is_visible(self.sector_position) then
-      local d = (targeted_ship.screen_position/182 - player_screen_position/182):normalize()
-      -- print_shadowed("order: "..#targeted_ship.orders.." "..co, 0, 85)
-      -- self.screen_position:draw_line(targeted_ship.screen_position,7)
-      local p1 = d*(self.sprite_rows/2+4) + player_screen_position
-      local p2 = d*(self.sprite_rows/2+14) + player_screen_position
-      local color, shadow = targeted_ship:targeted_color()
-      p1:draw_line(p2, color)
-      local distance = format_float((targeted_ship.screen_position - player_screen_position):scaled_length())
-      if p2.x > 63 then
-        p2:add(Vector(3,-2))
-      else
-        p2:add(Vector(-4 * #distance - 1,-2))
-      end
-      print_shadowed(distance, round(p2.x), round(p2.y), color, shadow)
-    end
-
-    print_shadowed("target "..targeted_ship:hp_string(), 0, 114)
-
-  end
 
   self:draw_sprite_rotated()
+
+  -- screen_center:draw_line(self:predict_sector_position() - self.sector_position + screen_center,11)
 end
 
 function Ship:hp_string()
@@ -767,7 +732,7 @@ function Ship:hp_string()
 end
 
 function Ship:is_visible(player_ship_pos)
-  local size = self.sprite_rows
+  local size = round(self.sprite_rows/2)
   local screen_position = (self.sector_position - player_ship_pos + screen_center):round()
   self.screen_position = screen_position
   return screen_position.x < 128 + size and
@@ -787,6 +752,14 @@ function Ship:reset_velocity()
   self.velocity = 0
 end
 
+function Ship:predict_sector_position()
+  local prediction = self.sector_position:clone()
+  if self.velocity > 0 then
+    prediction:add( self.velocity_vector * 4 )
+  end
+  return prediction
+end
+
 function Ship:set_destination(dest)
   self.destination = dest.sector_position
   self:update_steering_velocity()
@@ -799,11 +772,9 @@ function Ship:flee()
   local away_from_enemy = self.steering_velocity:angle()
   local toward_enemy = (away_from_enemy+.5) % 1
   if self.distance_to_destination < 55 then
-    -- co = "fleeing"
     self:rotate_towards_heading(away_from_enemy)
     self:apply_thrust()
   else
-    -- co = "stopping"
     self:full_stop(true)
     if self.hostile and
       self.angle_radians < toward_enemy+.1 and
@@ -840,7 +811,10 @@ function Ship:seek()
     self:apply_thrust(abs(self.steering_velocity:length()))
   end
   if self.hostile then
-    self:fire_weapon()
+    if distance < 128 then
+      self:fire_weapon()
+      self:fire_missile()
+    end
   end
 
   -- if distance < 32 then
@@ -903,12 +877,11 @@ function Ship:cut_thrust()
 end
 
 function Ship:wait()
-  -- co = "waiting "..secondcount.." > "..(self.wait_duration + self.wait_time)
   if secondcount > self.wait_duration + self.wait_time then
     self:order_done()
   end
 end
--- co = ""
+
 function Ship:full_stop()
   if self.velocity > 0 and self:reverse_direction() then
     self:apply_thrust()
@@ -919,8 +892,15 @@ function Ship:full_stop()
   end
 end
 
+function Ship:fire_missile(weapon)
+  if self.target and secondcount > 3 + self.last_fire_time then
+    self.last_fire_time = secondcount
+    add(projectiles, HomingWeapon.new(self, self.target))
+  end
+end
+
 function Ship:fire_weapon(weapon)
-  local weapon_velocity = Vector(1):rotate(self.angle_radians)
+  local weapon_velocity = rotated_vector(self.angle_radians)
   local hardpoint_location = weapon_velocity * (self.sprite_rows/2) + self.screen_position
   if framecount%3==0 then
     add(projectiles,
@@ -955,26 +935,26 @@ function Ship:apply_thrust(max_velocity)
   local additional_velocity_vector = Vector(cos(a) * dv, sin(a) * dv)
   local velocity_vector = self.velocity_vector
   local velocity
+  local engine_location = rotated_vector(a, self.sprite_rows * -.5) + self.screen_position
+
+  add(particles,
+      ThrustExhaust.new(
+        engine_location,
+        additional_velocity_vector*-1.3*self.sprite_rows))
 
   velocity_vector:add(additional_velocity_vector)
-
-  if velocity_vector.x > 180 or velocity_vector.y > 180 then
-    velocity = velocity_vector:scaled_length()
-  else
-    velocity = velocity_vector:length()
-  end
+  -- if velocity_vector.x > 180 or velocity_vector.y > 180 then
+    -- velocity = velocity_vector:scaled_length()
+  -- else
+  velocity = velocity_vector:length()
+  -- end
 
   self.velocity_angle = velocity_vector:angle()
   self.velocity_angle_opposite = (self.velocity_angle + 0.5)%1
 
-  local engine_location = Vector(1):rotate(a) * -(self.sprite_rows/2) + self.screen_position
   if velocity < .05 then
     velocity = 0.0
     velocity_vector = Vector()
-  else
-    add(particles,
-        ThrustExhaust.new(engine_location,
-                          additional_velocity_vector*-1.3*self.sprite_rows))
   end
 
   self.velocity = velocity
@@ -996,6 +976,46 @@ function Ship:rotate_towards_heading(heading) -- in radians
   end
   return delta < 0.1 and delta > -.1
 end
+
+HomingWeapon = {}
+HomingWeapon.__index = HomingWeapon
+function HomingWeapon.new(firing_ship, target_ship)
+  local pa = (firing_ship.angle_radians+.25)%1
+  -- local deflection = pv:perpendicular():normalize() * (rnd(2)-1)
+  return setmetatable(
+    { sector_position = firing_ship.sector_position:clone(),
+      screen_position = firing_ship.screen_position:clone(),
+      velocity_vector = rotated_vector(pa, .5)+firing_ship.velocity_vector,
+      velocity = firing_ship.velocity,
+      target = target_ship,
+      sprite_rows = 1,
+      firing_ship = firing_ship,
+      current_deltav = .1, -- 9.806 * 8 / 300,
+      deltav = .1, -- 9.806 * 8 / 300, -- 30fps * scaling factor
+      hp_percent = 1,
+      duration = 512,
+      damage = 20
+    }, HomingWeapon)
+end
+function HomingWeapon:draw(ship_velocity, offscreen_pos)
+  local screen_position = offscreen_pos or self.screen_position
+  self.last_offscreen_pos = offscreen_pos
+  self.destination = self.target:predict_sector_position()
+  self:update_steering_velocity()
+  -- self.screen_position:draw_line(self.screen_position + self.steering_velocity, 11)
+  self.angle_radians = self.steering_velocity:angle()
+  if self.duration < 500 then
+    self:apply_thrust(abs(self.steering_velocity:length()))
+  end
+  self.duration -= 1
+  self:update_location()
+  -- print(self.sector_position:tostring().." "..(playership.target.sector_position - self.sector_position):scaled_length() , 0, 80, 7)
+  if self:is_visible(playership.sector_position) or offscreen_pos then
+    screen_position:draw_line(screen_position+rotated_vector(self.angle_radians,4), 6)
+  end
+end
+setmetatable(HomingWeapon,{__index = Ship})
+
 
 Star = {}
 Star.__index = Star
@@ -1043,11 +1063,10 @@ end
 function Sun:draw(ship_pos)
   if stellar_object_is_visible(self, ship_pos) then
     for i=0,1 do
-      circfill(
-        self.screen_position.x,
-        self.screen_position.y,
+      self.screen_position:draw_circle(
         self.radius-i*3,
-        sun_colors[i+1][self.sun_color_index])
+        sun_colors[i+1][self.sun_color_index],
+        true)
     end
   end
 end
@@ -1105,10 +1124,6 @@ function Sector:new_planet_along_elipse()
     end
     -- planets less than 500 units apart are too close
     planet_is_nearby = smallest_distance < 15 -- 500 / 33
-    -- print("D> "..(smallest_distance*33))
-    -- if not planet_is_nearby then
-    --   break
-    -- end
   end
   -- planets should be at most 5000ish units away
   -- scale the 150 units (at most) of the elipse up to that
@@ -1164,51 +1179,31 @@ function is_offscreen(p, m)
   local margin = m or 0
   local mincoord = 0-margin
   local maxcoord = 128+margin
-  local x = p.position.x
-  local y = p.position.y
-  return p.duration < 0 or x > maxcoord or x < mincoord or y > maxcoord or y < mincoord
-end
-
-MultiCannon = {}
-MultiCannon.__index = MultiCannon
-function MultiCannon.new(p, pv, c, firing_ship)
-  local deflection = pv:perpendicular():normalize() * (rnd(2)-1)
-  return setmetatable(
-    { position = p,
-      position2 = p:clone(),
-      particle_velocity = pv + deflection,
-      color = c,
-      ship = firing_ship,
-      duration = 256
-    }, MultiCannon)
-end
-function MultiCannon:draw(ship_velocity)
-  -- find position2 slightly behind self.position by 2 or 3 pixels
-  -- self.position2 = self.position:clone():add(
-    -- self.particle_velocity:clone():normalize() * 2 - ship_velocity)
-  self.position:add(self.particle_velocity - ship_velocity)
-  self.position2:draw_line(self.position, self.color)
-  self.position2 = self.position:clone()
-  -- pset(self.position.x, self.position.y, self.color)
-  self.duration -= 1
+  local x = p.screen_position.x
+  local y = p.screen_position.y
+  if p.deltav then -- if this is a homingweapon
+    return p.duration < 0
+  else
+    return p.duration < 0 or x > maxcoord or x < mincoord or y > maxcoord or y < mincoord
+  end
 end
 
 Spark = {}
 Spark.__index = Spark
 function Spark.new(p, pv, c, d)
   return setmetatable(
-    { position = p,
+    { screen_position = p,
       particle_velocity = pv,
       color = c,
       duration = d or random_int(7,2)
     }, Spark)
 end
 function Spark:update(ship_velocity)
-  self.position:add(self.particle_velocity - ship_velocity)
+  self.screen_position:add(self.particle_velocity - ship_velocity)
   self.duration -= 1
 end
 function Spark:draw(ship_velocity)
-  pset(self.position.x, self.position.y, self.color)
+  pset(self.screen_position.x, self.screen_position.y, self.color)
   self:update(ship_velocity)
 end
 
@@ -1216,7 +1211,7 @@ Circle = {}
 Circle.__index = Circle
 function Circle.new(p, pv, c, d, center)
   return setmetatable(
-    { position = p:clone(),
+    { screen_position = p:clone(),
       particle_velocity = pv,
       color = c,
       center_position = center or p:clone(),
@@ -1224,25 +1219,57 @@ function Circle.new(p, pv, c, d, center)
     }, Circle)
 end
 function Circle:draw(ship_velocity)
-  -- self.center_position:draw_line(self.position, self.color)
-  local dist = flr(Vector.distance(self.position, self.center_position))
+  local dist = flr(Vector.distance(self.screen_position, self.center_position))
   for i=dist+3,dist,-1 do
     local c = damage_colors2[#damage_colors2-3-self.duration+i]
     if c then
-      circfill(self.center_position.x, self.center_position.y, i, c)
+      self.center_position:draw_circle(i, c, true)
     end
   end
   self:update(ship_velocity)
 end
 setmetatable(Circle,{__index = Spark})
 
+function make_explosion(pixel1, size)
+  local explosion_direction = random_angle()
+  add(particles,
+      Circle.new(
+        pixel1,
+        explosion_direction*rnd(.5),--*(rnd()+.5),
+        color,
+        #damage_colors2-3,
+        (explosion_direction * (size or 4)) + pixel1
+  ))
+end
+
+MultiCannon = {}
+MultiCannon.__index = MultiCannon
+function MultiCannon.new(p, pv, c, ship)
+  local deflection = pv:perpendicular():normalize() * (rnd(2)-1)
+  return setmetatable(
+    { screen_position = p,
+      position2 = p:clone(),
+      particle_velocity = pv + deflection,
+      color = c,
+      firing_ship = ship,
+      duration = 16
+    }, MultiCannon)
+end
+function MultiCannon:draw(ship_velocity)
+  self:update(ship_velocity)
+  self.position2:draw_line(self.screen_position, self.color)
+  self.position2 = self.screen_position:clone()
+end
+setmetatable(MultiCannon,{__index = Spark})
+
 ThrustExhaust = {}
 ThrustExhaust.__index = ThrustExhaust
 function ThrustExhaust.new(p, pv)
   return setmetatable(
-    { position = p,
+    { screen_position = p,
       particle_velocity = pv,
-      duration = 0 }, ThrustExhaust)
+      duration = 0
+    }, ThrustExhaust)
 end
 function ThrustExhaust:draw(ship_velocity)
   local c = random_int(11,9)
@@ -1250,10 +1277,10 @@ function ThrustExhaust:draw(ship_velocity)
   local deflection = pv:perpendicular() * 0.7
   local flicker = (pv * (rnd(2)+2)) + (deflection * (rnd()-.5))
 
-  local p0 = self.position + flicker
-  local p1 = self.position + pv + deflection
-  local p2 = self.position + pv + deflection*-1
-  local p3 = self.position
+  local p0 = self.screen_position + flicker
+  local p1 = self.screen_position + pv + deflection
+  local p2 = self.screen_position + pv + deflection*-1
+  local p3 = self.screen_position
   p1:draw_line(p0,c)
   p2:draw_line(p0,c)
   p2:draw_line(p3,c)
@@ -1263,7 +1290,7 @@ function ThrustExhaust:draw(ship_velocity)
     add(particles, Spark.new(p0,ship_velocity+(flicker*.25),c))
   end
 
-  self.position:add(pv - ship_velocity)
+  self.screen_position:add(pv - ship_velocity)
   self.duration -= 1
 end
 
@@ -1359,18 +1386,12 @@ for i = 0, 255 do
   perms[i + 256], perms12[i], perms12[i + 256] = perms[i], x, x
 end
 
--- 3D weight contribution
 function GetN_3d (ix, iy, iz, x, y, z)
   local t = .6 - x * x - y * y - z * z
   local index = perms12[ix + perms[iy + perms[iz]]]
   return max(0, (t * t) * (t * t)) * (Grads3[index][0] * x + Grads3[index][1] * y + Grads3[index][2] * z)
 end
 
---
--- @param x
--- @param y
--- @param z
--- @return Noise value in the range [-1, +1]
 function Simplex3D (x, y, z)
   -- 3D skew factors:
   -- F = 1 / 3
@@ -1673,12 +1694,12 @@ function add_npc(p)
   local npc = Ship.new(2,4):generate_random_ship()
   npc:set_position_near_object(position)
   npc.npc = true
+  add(npcships, npc)
+  npc.index = #npcships
   if npc.ship_type.name ~= "freighter" and rnd() < .2 then
     npc.hostile = true
   end
-  add(npcships, npc)
 end
-
 
 function load_sector()
   thissector = Sector.new()
@@ -1704,8 +1725,6 @@ function load_sector()
     end
   end
 
-  -- insert test planet
-  -- add(thissector.planets, Planet.new(playership.sector_position.x+63,playership.sector_position.y+63, .6, 32))
   return true -- stay paused
 end
 
@@ -1723,6 +1742,20 @@ function _init()
 
   load_sector()
   setup_minimap()
+  show_title_screen = true
+
+  local title_screen_starfield_velocity = Vector(0,-3)
+
+  while(not btnp(4)) do
+    cls()
+    thissector:scroll_starfield(title_screen_starfield_velocity)
+    thissector:draw_starfield(title_screen_starfield_velocity)
+    circfill(64,135,90,2)
+    circfill(64,172,122,0)
+    map(0,0,6,-15)
+    print("\n\n    ”  thrust      —  fire\n  ‹  ‘  rotate  Ž  menu\n    ƒ  reverse",0,70,7)
+    flip()
+  end
 end
 
 minimap_sizes = {16,32,48,128,false}
@@ -1737,14 +1770,12 @@ function setup_minimap(size)
 end
 
 function draw_minimap_planet(object)
-  -- local position = (object.sector_position-Vector(object.radius,object.radius) + screen_center) / minimap_denominator + minimap_offset
   local position = object.sector_position + screen_center
   if object.planet_type then position:add(Vector(-object.radius, -object.radius)) end
   position = position / minimap_denominator + minimap_offset
   if minimap_size > 100 then
     local r = ceil(object.radius/32)
-    -- circfill(position.x, position.y, r+1, 0)
-    circ(position.x, position.y, r+1, object.color)
+    position:draw_circle(r+1, object.color)
   else
     position:draw_point(object.color)
   end
@@ -1752,10 +1783,11 @@ end
 
 function draw_minimap_ship(object)
   local point = (object.sector_position/minimap_denominator):add(minimap_offset):round()
+  local color = object:targeted_color()
   if object.npc then
-    point:draw_point(object:targeted_color())
+    point:draw_point(color)
     if object.targeted then
-      circ(point.x, point.y, 2, object:targeted_color())
+      point:draw_circle(2, color)
     end
   else
     rect(point.x-1,point.y-1,point.x+1,point.y+1, 15)
@@ -1774,18 +1806,18 @@ function draw_minimap()
     local scale_factor = min(6, flr(x/5000)+1)
     minimap_denominator = scale_factor*5000/minimap_size_halved
 
-    -- for s in all(thissector.suns) do
-    --   -- sun sector position is from the center
-    --   draw_minimap_planet(s, s.sector_position / minimap_denominator)
-    -- end
-
     for p in all(thissector.planets) do
       -- planets sector position is from the upper left corner
       draw_minimap_planet(p)
     end
 
     -- ships on the minimap blink
-    if framecount%2 == 1 then
+    if framecount%3 ~= 0 then
+      for missile in all(projectiles) do
+        if missile.deltav then
+          draw_minimap_ship(missile)
+        end
+      end
       for ship in all(npcships) do
         draw_minimap_ship(ship)
       end
@@ -1881,7 +1913,6 @@ function display_menu(options, callbacks, selected)
   -- end
   -- rect(0,0,127,127,7)
 
-  -- local center = Vector(64,60)
   local center = Vector(64,90)
   local arrow_offset = center + Vector(-1,2)
   for a=.25,1,.25 do
@@ -1894,14 +1925,13 @@ function display_menu(options, callbacks, selected)
       -- outline_color = 13
     end
 
-    -- local p = Vector(6):rotate(a) + center + arrow_offset
-    local p = Vector(8):rotate(a) + arrow_offset
-    p:draw_line(Vector(3):rotate(a) + arrow_offset, text_color)
-    p:draw_line(Vector(5,2):rotate(a) + arrow_offset, text_color)
-    p:draw_line(Vector(5,-2):rotate(a) + arrow_offset, text_color)
+    local p = rotated_vector(a, 8) + arrow_offset
+    p:draw_line(rotated_vector(a, 3) + arrow_offset, text_color)
+    p:draw_line(rotated_vector(a, 5, 2) + arrow_offset, text_color)
+    p:draw_line(rotated_vector(a, 5, -2) + arrow_offset, text_color)
 
     if current_options[i] then
-      p = Vector(14):rotate(a) + center
+      p = rotated_vector(a, 14) + center
       -- move text into place based on string length
       if a == .5 then -- if left
         p:add(Vector(-4 * #current_options[i]))
@@ -1919,24 +1949,24 @@ end
 function main_menu()
   display_menu(
     { "autopilot",
-      "debug",
-      "display options",
+      "fire missile",
+      "options",
       "systems"},
     { -- autopilot
       function ()
         display_menu(
           {
-            "nearest planet",
             "full stop",
+            "planet",
             "back",
             "follow",
           },
           {
-            approach_nearest_planet,
             function ()
               playership:reset_orders(playership.full_stop)
               return false -- unpause
             end,
+            approach_nearest_planet,
             main_menu,
             function ()
               playership:reset_orders(playership.seek)
@@ -1945,37 +1975,19 @@ function main_menu()
             end,
         })
       end,
-
-      -- debug menu
       function ()
-        display_menu(
-          { "new ship",
-            "spawn enemy",
-            "new sector",
-            "back",
-          },
-          { -- ship regen test
-            function ()
-              s = max((s+1)%48,8)
-              playership:generate_random_ship(s)
-              return playership.ship_type.name.." "..s
-            end,
-            function ()
-              add_npc()
-              npcships[#npcships].hostile = true
-              return "npc created"
-            end,
-            load_sector,
-            main_menu,
-        })
-      end, -- debug menu
+        playership:fire_missile()
+        return false -- unpause
+      end,
 
-      -- display options
+      -- options
       function ()
         display_menu(
           { "back",
             "starfield",
-            "minimap size"},
+            "minimap size",
+            "debug"
+          },
           { main_menu,
             function ()
               display_menu(
@@ -2007,7 +2019,31 @@ function main_menu()
               -- toggle minimap size
               setup_minimap((minimap_size_index+1)%#minimap_sizes)
               return true -- stay paused
-            end
+            end,
+
+            -- debug menu
+            function ()
+              display_menu(
+                { "new ship",
+                  "back",
+                  "new sector",
+                  "spawn enemy",
+                },
+                { -- ship regen test
+                  function ()
+                    s = max((s+1)%48,8)
+                    playership:generate_random_ship(s)
+                    return playership.ship_type.name.." "..s
+                  end,
+                  main_menu,
+                  load_sector,
+                  function ()
+                    add_npc()
+                    npcships[#npcships].hostile = true
+                    return "npc created"
+                  end,
+              })
+            end, -- debug menu
           }
         )
       end, -- display option function
@@ -2168,11 +2204,18 @@ function _update()
     for ship in all(npcships) do
       if ship.last_hit_time and ship.last_hit_time + 30 > secondcount then
         ship:reset_orders()
-        ship:flee()
+        ship:flee() -- run away
+        if ship.hostile then
+          ship.target = ship.last_hit_attacking_ship
+          ship.target_index = ship.target.index
+        end
       else
         if #ship.orders == 0 then
           if ship.hostile then
             ship.seektime = 0
+            if not ship.target then
+              next_ship_target(ship, true)
+            end
             add(ship.orders, ship.seek)
           else
             ship:approach_object()
@@ -2218,12 +2261,38 @@ function render_game_screen()
       ship:draw_sprite_rotated()
     end
   end
+
+  if playership.target then
+    last_offscreen_pos = nil
+    local player_screen_position = playership.screen_position
+    local targeted_ship = playership.target
+    if targeted_ship then
+      if not targeted_ship:is_visible(playership.sector_position) then
+        local distance = format_float((targeted_ship.screen_position - player_screen_position):scaled_length())
+        local color, shadow = targeted_ship:targeted_color()
+
+        local hr = flr(targeted_ship.sprite_rows*.5)
+        local d = rotated_vector((targeted_ship.screen_position - player_screen_position):angle())
+        last_offscreen_pos = d*(60 - hr) + screen_center
+        local p2 = last_offscreen_pos:clone():add(Vector(-4 * (#distance/2)))
+        targeted_ship:draw_sprite_rotated(last_offscreen_pos)
+        if p2.y > 63 then
+          p2:add(Vector(1,-12 - hr))
+        else
+          p2:add(Vector(1,7+hr))
+        end
+        print_shadowed(distance, round(p2.x), round(p2.y), color, shadow)
+      end -- if not visible
+      print_shadowed("target "..targeted_ship:hp_string(), 0, 114)
+    end
+  end
+
   if playership.hp < 1 then
     playership:generate_random_ship()
   end
   playership:draw()
   for particle in all(particles) do
-    if is_offscreen(particle) then
+    if is_offscreen(particle, 32) then
       del(particles, particle)
     else
       particle:draw(playership.velocity_vector)
@@ -2234,7 +2303,16 @@ function render_game_screen()
     if is_offscreen(projectile, 63) then
       del(projectiles, projectile)
     else
-      projectile:draw(playership.velocity_vector)
+      if last_offscreen_pos and projectile.sector_position and playership.target and
+      (playership.target.sector_position - projectile.sector_position):scaled_length() <= playership.target.sprite_rows then
+        projectile:draw(
+          nil,
+          (projectile.sector_position - playership.target.sector_position) +
+            last_offscreen_pos
+        )
+      else
+        projectile:draw(playership.velocity_vector)
+      end
     end
   end
 
@@ -2251,15 +2329,6 @@ function _draw()
   end
 end
 __gfx__
-77d00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-77777660000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-07777777766000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00777777777776000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00777777777777760000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00777777777776000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-07777777766000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-77777660000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-77d00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -2316,6 +2385,144 @@ __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000008880888099900000aaa0aaa00bbbbb00333330000ddddd00ccc0ccc0011111002220000000000000000000000000000000000000
+0000000000000000000000008880888099900000aaa0aaa0bbbbbbb033333300ddddddd0ccc0ccc0111111102220000000000000000000000000000000000000
+0000000000000000000000008880888077700000aaa0aaa0bbbbbbb033333330ddddddd0ccc0ccc0111111107770000000000000000000000000000000000000
+0000000000000000000000008880888099999990aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111011102222222000000000000000000000000000000000
+0000000000000000000000008880888099999990aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111011102222222000000000000000000000000000000000
+0000000000000000000000008880888099999990aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111011102222222000000000000000000000000000000000
+0000000000000000000000008880888099900000aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000000000
+0000000000000000000000008880888099900000aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000000000
+0000000000000000000000008880888099999990aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111000002222222000000000000000000000000000000000
+0000000000000000000000008880888099999990aaa0a000bbb0bbb033303330ddd0ddd0ccc0ccc0111000002222222000000000000000000000000000000000
+0000000000000000000000007770777099999990aaa00000bbb0bbb0333033307770777077707770777000002222222000000000000000000000000000000000
+0000000000000000000000008888888099900000aaa00aaabbb0bbb033303330ddddddd0ccc0ccc0111111002220000000000000000000000000000000000000
+0000000000000000000000008888888099900000aaaa9a9abbb0bbb033303330ddddddd0ccc0ccc0011111102220000000000000000000000000000000000000
+0000000000000000000000008888888099900000a9a9a900bbb0bbb033303330ddddddd0ccc0ccc0000011102220000000000000000000000000000000000000
+00000000000000000000000088808880999000009a9a0000bbb0bbb033303330ddd0ddd0ccc0ccc0000011102220000000000000000000000000000000000000
+0000000000000000000000008880888099900000a9000000bbb0bbb033303330ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000000000
+0000000000000000000000008880888099900000aaa0aaa0bbbb3b3033303330ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000000000
+0000000000000000000000008880888099900000aaa0aaa0b3b3b30033303330ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000000000
+0000000000000000000000008880888099900000777077703b3b000077707770ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000000000
+0000000000000000000000008880888099900000aaa0aaa00000000033333330ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000000000
+0000000000000000000000008880888099900000aaa0aaa00000000033333300ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000000000
+0000000000000000000000008880828099900000aaa0aaa00000000033333000ddd0ddd0dcdcccc0111011102220000000000000000000000000000000000000
+0000000000000000000000008820282099900000aaa0aaa00000000033300000ddd0ddd00dcdcdc0111011102220000000000000000000000000000000000000
+0000000000000000000000008280800099900000aaa0aaa00000000033300000ddd0ddd0000cdc00111011102220000000000000000000000000000000000000
+000000000000000000000000000000009990009000000000bbb0bbb033300000d1d0ddd000000000111011102220000000000000000000000000000000000000
+000000000000000000000000000000009990949400000000bbb0bbb0333000001d10ddd000000000515111102220000000000000000000000000000000000000
+000000000000000000000000000000009999494000000000777077703330000000d0d1d000000000051515102220000000000000000000000000000000000000
+000000000000000000000000000000009494900000000000bbb0bbb03330000000001d1000000000000151002220000000000000000000000000000000000000
+000000000000000000000000000000004940000000000000bbb0bbb033300000000000d000000000000000005220000000000000000000000000000000000000
+000000000000000000000000000000009000000000000000bbb0bbb0335000000000000000000000000000002522222200000000000000000000000000000000
+000000000000000000000000000000000000000000000000bbb0bbb0353000000000000000000000000000000252525200000000000000000000000000000000
+000000000000000000000000000000000000000000000000bbb0bbb0530000000000000000000000000000000005252500000000000000000000000000000000
+__label__
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000700000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000007000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000007000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000700000000000000000000000000000000000000000000000070000000000000000000000000000000000000000000000000000700000000
+00000000000000000000000000000000000000000000000000000000000000000000000000070000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000007000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000700000000000000000000000007000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000700000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000070000000000000000000
+0000000000000000000000000000008880888099999990aaa0aaa00bbbbb00333330000ddddd00ccc0ccc0011111002222222000000000000000000000000000
+0000000000000000000000000000008880888099999990aaa0aaa0bbbbbbb033333300ddddddd0ccc0ccc0111111102222222000000000000000000000000000
+0000000000070000000000000000008880888099999990aaa0aaa0bbbbbbb033333330ddddddd0ccc0ccc0111111102222222000000000000000000000000000
+0000000000000000000000000000008880888099900000aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000
+0000000000000000000000000000008880888099900000aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000
+0000000000000000000000000000008880888099900000aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000
+0000000000000000000000000000008880888099900000aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000
+0000000000000000000000000000008880888099900000aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000
+0000000000000000000000000000008880888099900000aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111011102220000700000000000000000000000000
+0000000000000000000000000000008880888099900000aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000
+0000000000000000000000000000008880888099900000aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000
+0000000000000000000000000000008880888099900000aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000
+0000000000000000000000000000008880888099900000aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000
+0000000000000000000000000000008880888099900000aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000
+0000000000000000000000000000008880888099900000aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111011102220000000700000000000000000000000
+0000000000000000000000000000008880888099900000aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000
+0000000000000000000000000000008880888099900000aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111000002220000000000000000000000000000000
+0000000000000000000000000000008880888099900000aaa0aaa0bbb0bbb033303330ddd0ddd0ccc0ccc0111000002220000000000000000000000000000000
+00000000000000000000000000000077707770777000007770777077707770777077707770777777707770777000007770000000000000000000000000000000
+0000000000000000000000070000008888888099999990aaa0aaa0bbb0bbb033333330ddddddd0ccc0ccc0111111002222222000000000000000000000000000
+0000000000000000000000000000008888888099999990aaa0aaa0bbb0bbb033333300ddddddd0ccc0ccc0011111102222222000000000000000000000000700
+0000000000000000000000000000008888888099999990aaa0aaa0bbb0bbb033333000ddddddd0ccc0ccc0000011102222222000000000000000000000000000
+0000000000000000000000000000008880888099900000aaa0aaa0bbb0bbb033300700ddd0ddd0ccc0ccc0000011102220000000000000000000000000000000
+0000000000000000000000000000008880888099900000aaa0aaa0bbb0bbb033300000ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000
+0000700000000000000000000000008880888099900000aaa0aaa0bbb0bbb033300000ddd0ddd0ccc0ccc0111011172220000000000000000000000000000000
+0000000000000000000000000000008880888099900000aaa0aaa0bbb0bbb033300000ddd0ddd0ccc0ccc0111011102220000000000000000000000000000000
+0000000000000000000000000000008880888099900000aaa0aaa0bbb0bbb033300000ddd0ddd0ccc0ccc0111011102220000000000000000000000000000070
+0000000000000000000000000000008880888099900000aaa0aaa0bbb0bbb033300000ddd0ddd0ccc0ccc7111011102220000000000000000000000000000000
+0000000000000000000000000000008880888099900000aaa0aaa0bbb2bbb233322222ddd2ddd0ccc0ccc0111011102220000000000000000000000000000000
+0000000000000000000000000000008880888099900000aaa2aaa2bbb2bbb233522222ddd2ddd2ccc0ccc0111011102220000000000000000000000000000000
+0000000000000000000000000000008880888099900222aaa2aaa2bbb2bbb235322222ddd2ddd2ccc2ccc2111011102220000000000000000000000000000000
+0000000000000000000000000000078880888099922222aaa2aaa2bbb2bbb253222222ddd2ddd2ccc2ccc2111011102220000000000000000000000000000000
+0000000000000000000000000000008880888299922222aaa2aaa2bbbb3b3222222222d1d2ddd2ccc2ccc2111211102220000000000000000000007000000000
+0070000000000000000000000000008880888299922222aaa2a220b3b3b300000000001d10ddd2ccc2ccc2111211122220000000000000000000070000000000
+0000000000000000000000000000008882888299922220aaa000003b3b00000000000000d0d1d0ccc0ccc2111211122222000000000000000007000000000000
+0000000000000000000000000000028882888299900000aaa00aaa000000000000000000001d10ccc0ccc0111211122222227000000000000000000000000000
+0000000000000000000000000022228882888099900000aaaa9a9a0000000000000000000000d0ccc0ccc0111011102222222220000000000000000000000000
+0000000000000070000000002222228880888099900000a9a9a900000000000000000000000000dcdcccc0111011102222222222200000000000000000000000
+00000000000000000000002222220088808880999000009a9a00000000000000000000000000000dcdcdc0111011102220000222222000000000000000000000
+0000000000000000000022222000008880888099900000a9000000000000000000000000000000000cdc00111011102220000000222220000000000000000000
+00000000000000000002220000000088808880999000900000000000000000000000000000000000000000111011102220000000000222000000000000000000
+00000000000000000222000000000088808880999094940000000000000000000000000000000000000000515111102220000000000002220000000000000000
+00000000000000002000000000000088808880999949400000000000000000000000000000000000000000051515102220000000000000002000000000700000
+00000000000000200000000000000088808880949490000000000000000000000000000000000000000000000151002220000000000000000020000000000000
+00000000000000000000000000000088808880494000000000000000000000000000000000000000000000000000005220000000000000000000000000000000
+00000000000000000000000000000088808280900000000000000000000000000000000000000000000000000000002522222200000000000000000000000000
+00000000000000000000000000000088202820000000000000000000000000000000000000000000000000000000000252525200000000000000000000000000
+00000000000000000000000000000082808000000000000000000000000000000000000000000000000000000000000005252500000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -2383,16 +2590,16 @@ __gff__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000c0c20000c0c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+d2c2c2c2c2000000000000000000c0c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+d2c2c2c20000000000000000c2c2c0c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+d2c2c20000000000000000c2c2c2c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+d2c2c2c3d4c5c6c7c8c9cadbc2c2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+d2c2c2c3e4c5d6d7e8c9eaebc2c2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+d2c2c2d3c4e5f6e7d8d9dacbc2c2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000000c3e4c5d6f7e8c9eaebc2c2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000000c3e4d5e600f8e9eaebc2c2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000000e3f4c000000000fafbc200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -2416,8 +2623,8 @@ __map__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __sfx__
-00020000276501d65013650106500c6400e63022620116300b63004630026101b6100861003610076101260013600106000d60010600116000e6001160012600116000a600066000960003600026000260002600
-011100000162001600056000460003600016000160001600026000160002600036000460001600016000a600016000160001600016000160002600016000260001600016000460023600246001f600246001f600
+000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

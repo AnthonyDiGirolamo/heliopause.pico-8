@@ -7,4 +7,6 @@ sed -i "s/\([a-z_\.][a-z_\.]*\)=\1\([-+\/*]\)\([^ ;][^ ;]*\)/\n\1\2=\3\n/g" heli
 sed -i 's/;\s*/\n/g' heliopause.lua
 sed -i 's/\(\S\)else/\1 else/g' heliopause.lua
 sed -i '/^$/d' heliopause.lua
+awk 'BEGIN{flag=1}/^$/{flag=0;next}flag' ../heliopause.p8 > pico8-header
+awk '/__gfx__/{flag=1}flag' ../heliopause.p8 > pico8-footer
 cat pico8-header heliopause.lua pico8-footer > heliopause.p8
