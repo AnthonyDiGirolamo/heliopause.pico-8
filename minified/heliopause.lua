@@ -1,147 +1,147 @@
-function split_number_string(s)local a={}local b=split_number_string_start_index
-local c=1
-for d=1,#s do if sub(s,d,d)==" "then a[b]=sub(s,c,d-1)+0
-b+=1
-c=d+1 end end
-return a end
-split_number_string_start_index=0
-local e={split_number_string"-1 1 0 ",split_number_string"1 -1 0 ",split_number_string"-1 -1 0 ",split_number_string"1 0 1 ",split_number_string"-1 0 1 ",split_number_string"1 0 -1 ",split_number_string"-1 0 -1 ",split_number_string"0 1 1 ",split_number_string"0 -1 1 ",split_number_string"0 1 -1 ",split_number_string"0 -1 -1 "}e[0]=split_number_string"1 1 0 "split_number_string_start_index=1
-damage_colors=split_number_string"7 10 9 8 5 0 "damage_colors2=split_number_string"7 10 9 8 5 0 7 10 9 8 5 0 7 10 9 8 5 0 "star_color_index=0
+function split_number_string(a)local b={}local c=split_number_string_start_index or 0
+local d=1
+for e=1,#a do if sub(a,e,e)==" "then b[c]=sub(a,d,e-1)+0
+c+=1
+d=e+1 end end
+return b end
+local f={split_number_string"-1 1 0 ",split_number_string"1 -1 0 ",split_number_string"-1 -1 0 ",split_number_string"1 0 1 ",split_number_string"-1 0 1 ",split_number_string"1 0 -1 ",split_number_string"-1 0 -1 ",split_number_string"0 1 1 ",split_number_string"0 -1 1 ",split_number_string"0 1 -1 ",split_number_string"0 -1 -1 "}f[0]=split_number_string"1 1 0 "split_number_string_start_index=1
+star_color_index=0
 star_color_monochrome=0
-star_colors={split_number_string"10 14 12 13 7 6 ",split_number_string"9 8 13 1 6 5 ",split_number_string"4 2 1 0 5 1 ",split_number_string"7 6 ",split_number_string"6 5 ",split_number_string"5 1 "}darkshipcolors=split_number_string"0 1 2 2 1 5 6 2 4 9 3 13 1 8 9 "dark_planet_colors=split_number_string"0 0 1 1 0 5 5 5 4 5 5 3 1 1 2 1 "function round(d)return flr(d+.5)end
-function ceil(f)return-flr(-f)end
+star_colors={split_number_string"10 14 12 13 7 6 ",split_number_string"9 8 13 1 6 5 ",split_number_string"4 2 1 0 5 1 ",split_number_string"7 6 7 6 7 6 ",split_number_string"6 5 6 5 6 5 ",split_number_string"5 1 5 1 5 1 "}darkshipcolors=split_number_string"0 1 2 2 1 5 6 2 4 9 3 13 1 8 9 "dark_planet_colors=split_number_string"0 0 1 1 0 5 5 5 4 5 5 3 1 1 2 1 "function round(e)return flr(e+.5)end
+function ceil(g)return-flr(-g)end
 function random_plus_to_minus_one()return random_int(3)-1 end
-function random_int(g,h)local i=h or 0
-return flr(rnd(32767))%(g-i)+i end
-function format_float(g)return flr(g).."."..flr(g%1*10)end
+function random_int(h,i)local j=i or 0
+return flr(rnd(32767))%(h-j)+j end
+function format_float(k)local h=flr(k*10+0.5)/10
+return flr(h).."."..flr(h%1*10)end
 Vector={}Vector.__index=Vector
-function Vector.new(f,j)return setmetatable({x=f or 0,y=j or 0},Vector)end
-function Vector:draw_point(color)pset(round(self.x),round(self.y),color)end
-function Vector:draw_line(k,color)line(round(self.x),round(self.y),round(k.x),round(k.y),color)end
-function Vector:draw_circle(l,color,m)local n=circ
-if m then n=circfill end
-n(round(self.x),round(self.y),round(l),color)end
+function Vector.new(g,l)return setmetatable({x=g or 0,y=l or 0},Vector)end
+function Vector:draw_point(m)pset(round(self.x),round(self.y),m)end
+function Vector:draw_line(n,m)line(round(self.x),round(self.y),round(n.x),round(n.y),m)end
+function Vector:draw_circle(o,m,p)local q=circ
+if p then q=circfill end
+q(round(self.x),round(self.y),round(o),m)end
 function Vector:round()self.x=round(self.x)self.y=round(self.y)return self end
-function Vector:normalize()local o=self:length()
-self.x/=o
-self.y/=o
+function Vector:normalize()local r=self:length()
+self.x/=r
+self.y/=r
 return self end
-function random_angle(p)return rotated_vector(rnd(),p)end
-function rotated_vector(q,f,j)return Vector(f or 1,j):rotate(q)end
-function Vector:rotate(r)local t=cos(r)local s=sin(r)local f=self.x
-local j=self.y
-self.x=t*f-s*j
-self.y=s*f+t*j
+function random_angle(s)return rotated_vector(rnd(),s)end
+function rotated_vector(t,g,l)return Vector(g or 1,l):rotate(t)end
+function Vector:rotate(u)local v=cos(u)local a=sin(u)local g=self.x
+local l=self.y
+self.x=v*g-a*l
+self.y=a*g+v*l
 return self end
-function Vector:add(k)
-self.x+=k.x
-self.y+=k.y
+function Vector:add(n)
+self.x+=n.x
+self.y+=n.y
 return self end
-function Vector.__add(u,v)return Vector.new(u.x+v.x,u.y+v.y)end
-function Vector.__sub(u,v)return Vector.new(u.x-v.x,u.y-v.y)end
-function Vector.__mul(u,v)return Vector.new(u.x*v,u.y*v)end
-function Vector.__div(u,v)return Vector.new(u.x/v,u.y/v)end
-function Vector:about_equals(k)return round(k.x)==self.x and round(k.y)==self.y end
+function Vector.__add(w,x)return Vector.new(w.x+x.x,w.y+x.y)end
+function Vector.__sub(w,x)return Vector.new(w.x-x.x,w.y-x.y)end
+function Vector.__mul(w,x)return Vector.new(w.x*x,w.y*x)end
+function Vector.__div(w,x)return Vector.new(w.x/x,w.y/x)end
+function Vector:about_equals(n)return round(n.x)==self.x and round(n.y)==self.y end
 function Vector:angle()return atan2(self.x,self.y)end
 function Vector:length()return sqrt(self.x^2+self.y^2)end
 function Vector:scaled_length()return sqrt((self.x/182)^2+(self.y/182)^2)*182 end
-function Vector.distance(u,v)return(v-u):length()end
+function vector_long_distance(w,x)return(x-w):scaled_length()end
 function Vector:tostring()return format_float(self.x)..", "..format_float(self.y)end
 function Vector:clone()return Vector.new(self.x,self.y)end
 function Vector:perpendicular()return Vector.new(-self.y,self.x)end
-setmetatable(Vector,{__call=function(w,...)return Vector.new(...)end})screen_center=Vector(63,63)Ship={}Ship.__index=Ship
-function Ship.new(x,y)local z={npc=false,screen_position=screen_center,sector_position=Vector(),gees=x or 4,turn_rate=y or 8,current_deltav=0,current_gees=0,angle=0,angle_radians=0,heading=90,velocity_angle=0,velocity_angle_opposite=180,velocity=0,velocity_vector=Vector(),orders={},last_fire_time=0}z.deltav=9.806*z.gees/300
-setmetatable(z,Ship)return z end
-ship_types={{name="cruiser",shape=split_number_string"3.5 .5 0 -1 .583333 .8125 18 24 "},{name="freighter",shape=split_number_string"3 2 0 -3 .2125 .8125 16 22 "},{name="fighter",shape=split_number_string"1.5 .25 .75 -2 .7 .8 14 18 "}}function Ship:generate_random_ship(A,B,C)self.ship_type=C or ship_types[random_int(#ship_types)+1]local D=self.ship_type.shape
-local E=B or rnd()srand(E)local F={}for d=6,15 do add(F,d)end
-for d=1,6 do del(F,random_int(16,6))end
-local G=0
-local H={}local I=A or random_int(D[8]+1,D[7])local J=flr(I/2)local K=Vector(1,D[1])local L=Vector(1,D[2])local M=Vector(1,D[3])local N=Vector(1,D[4])local O=flr(D[5]*I)local P=flr(D[6]*I)for j=1,I do add(H,{})for f=1,J do add(H[j],F[4])end end
-local Q=K
-local R=L
-local S=round(I/3)local T=round(J/4)for j=2,I-1 do for f=1,J do local color=F[1]if j>=S+random_plus_to_minus_one()and j<=2*S+random_plus_to_minus_one()then color=F[3]end
-if f>=T+random_plus_to_minus_one()and j>=2*S+random_plus_to_minus_one()then color=F[2]end
-if J-f<max(0,flr(Q.y))then if rnd()<.6 then H[j][f]=color
-G=G+1
-if H[j-1][f]==F[4]then H[j][f]=darkshipcolors[color]end end end end
-if j>=P then R=N elseif j>=O then R=M end
-Q=Q+R
-if Q.y>0 and j>3 and j<I-1 then for d=1,random_int(round(Q.y/4)+1)do H[j][J-d]=5
-G=G+2 end end end
-local U=random_int(2)for j=I,1,-1 do for f=J-U,1,-1 do add(H[j],H[j][f])end end
-self.hp=G
-self.max_hp=G
+setmetatable(Vector,{__call=function(y,...)return Vector.new(...)end})screen_center=Vector(63,63)Ship={}Ship.__index=Ship
+function Ship.new()local z={npc=false,screen_position=screen_center,sector_position=Vector(),current_deltav=0,current_gees=0,angle=0,angle_radians=0,heading=90,velocity_angle=0,velocity_angle_opposite=180,velocity=0,velocity_vector=Vector(),orders={},last_fire_time=0}setmetatable(z,Ship)return z end
+ship_types={{name="cruiser",shape=split_number_string"3.5 .5 0 -1 .583333 .8125 18 24 "},{name="freighter",shape=split_number_string"3 2 0 -3 .2125 .8125 16 22 "},{name="super freighter",shape=split_number_string"6 -.25 0 .25 .2125 .8125 32 45 "},{name="fighter",shape=split_number_string"1.5 .25 .75 -2 .7 .8 14 18 "}}function Ship:generate_random_ship(A)local B=A or random_int(32767)srand(B)self.seed_value=B
+self.ship_type=ship_types[random_int(#ship_types)+1]local C=self.ship_type.shape
+local D=split_number_string"6 7 8 9 10 11 12 13 14 15 "for e=1,6 do del(D,D[random_int(#D)+1])end
+local E=0
+local F={}local G=random_int(C[8]+1,C[7])local H=flr(G/2)local I=Vector(1,C[1])local J=Vector(1,C[2])local K=Vector(1,C[3])local L=Vector(1,C[4])local M=flr(C[5]*G)local N=flr(C[6]*G)for l=1,G do add(F,{})for g=1,H do add(F[l],D[4])end end
+local O=I
+local P=J
+local Q=round(G/3)local R=round(H/4)for l=2,G-1 do for g=1,H do local m=D[1]if l>=Q+random_plus_to_minus_one()and l<=2*Q+random_plus_to_minus_one()then m=D[3]end
+if g>=R+random_plus_to_minus_one()and l>=2*Q+random_plus_to_minus_one()then m=D[2]end
+if H-g<max(0,flr(O.y))then if rnd()<.6 then F[l][g]=m
+E=E+1
+if F[l-1][g]==D[4]then F[l][g]=darkshipcolors[m]end end end end
+if l>=N then P=L elseif l>=M then P=K end
+O=O+P
+if O.y>0 and l>3 and l<G-1 then for e=1,random_int(round(O.y/4)+1)do F[l][H-e]=5
+E=E+2 end end end
+local S=random_int(2)for l=G,1,-1 do for g=H-S,1,-1 do add(F[l],F[l][g])end end
+self.hp=E
+self.max_hp=E
 self.hp_percent=1
-self.sprite_rows=I
-self.sprite_columns=#H[1]self.transparent_color=F[4]self.sprite=H
+self.deltav=max(E*-0.0188235294118+4.56470588235,1)*0.03268667
+self.turn_rate=round(max(E*-0.0470588235294+11.4117647059,2))self.sprite_rows=G
+self.sprite_columns=#F[1]self.transparent_color=D[4]self.sprite=F
 return self end
-function nearest_planet()local V
-local W=32767
-for X in all(thissector.planets)do if X.planet_type then local Y=Vector.distance(playership.sector_position/182,X.sector_position/182)if Y<W then W=Y
-V=X end end end
-return V,W*182 end
-function land_at_nearest_planet()local V,W=nearest_planet()if W<V.radius*1.4 then if playership.velocity<.5 then thissector:reset_planet_visibility()landed_front_rendered=false
+function nearest_planet()local T
+local U=32767
+for V in all(thissector.planets)do if V.planet_type then local W=vector_long_distance(playership.sector_position,V.sector_position)if W<U then U=W
+T=V end end end
+return T,U end
+function land_at_nearest_planet()local T,U=nearest_planet()if U<T.radius*1.4 then if playership.velocity<.5 then thissector:reset_planet_visibility()landed_front_rendered=false
 landed_back_rendered=false
-landed_planet=V
+landed_planet=T
 landed=true
-landed_menu()draw_rect(128,128,0) else notifications:add("moving too fast to land")end else notifications:add("too far to land")end
+landed_menu()draw_rect(128,128,0) else notification_add("moving too fast to land")end else notification_add("too far to land")end
 return false end
 function takeoff()thissector:reset_planet_visibility()playership:set_position_near_object(landed_planet)landed=false
 return false end
-function Ship:set_position_near_object(Z)local l=Z.radius or Z.sprite_rows
-self.sector_position=random_angle(1.2*l)+Z.sector_position
+function Ship:set_position_near_object(X)local o=X.radius or X.sprite_rows
+self.sector_position=random_angle(1.2*o)+X.sector_position
 self:reset_velocity()end
 function Ship:clear_target()self.target_index=nil
 self.target=nil end
-function clear_targeted_ship_flags()for _ in all(npcships)do _.targeted=false end end
-function next_hostile_target(_)local a0=_ or playership
-local a1
-for d=1,#npcships do next_ship_target(_)if a0.target.hostile then break end end
+function clear_targeted_ship_flags()for Y in all(npcships)do Y.targeted=false end end
+function next_hostile_target(Y)local Z=Y or playership
+local _
+for e=1,#npcships do next_ship_target(Y)if Z.target.hostile then break end end
 return true end
-function next_ship_target(_,a2)local a0=_ or playership
-if a2 then a0.target_index=random_int(#npcships)+1 else a0.target_index=(a0.target_index or#npcships)%#npcships+1 end
-a0.target=npcships[a0.target_index]if a0==a0.target then a0.target=playership end
-if not _ then clear_targeted_ship_flags()a0.target.targeted=true end
+function next_ship_target(Y,a0)local Z=Y or playership
+if a0 then Z.target_index=random_int(#npcships)+1 else Z.target_index=(Z.target_index or#npcships)%#npcships+1 end
+Z.target=npcships[Z.target_index]if Z==Z.target then Z.target=playership end
+if not Y then clear_targeted_ship_flags()Z.target.targeted=true end
 return true end
 function Ship:targeted_color()if self.hostile then return 8,2 else return 11,3 end end
-function Ship:draw_sprite_rotated(a3)local a4=a3 or self.screen_position
-local u=self.angle_radians
-local I=self.sprite_rows
-local J=self.sprite_columns
-local a5=self.transparent_color
-if self.targeted then local a6=round(I/2)+4
-local a7,a8=self:targeted_color()if a3 then(a4+Vector(1,1)):draw_circle(a6,a8,true)a4:draw_circle(a6,0,true)end
-a4:draw_circle(a6,a7)end
-local a9={}for aa in all(projectiles)do if aa.firing_ship~=self then if aa.sector_position and a3 and(self.sector_position-aa.sector_position):scaled_length()<=I or Vector.distance(aa.screen_position,a4)<I then add(a9,aa)end end end
-local ab
-for j=1,J do for f=1,I do local color=self.sprite[f][j]if color~=a5 and color~=nil then local ac=Vector(I-f-flr(I/2),j-flr(J/2)-1)local ad=Vector(ac.x+1,ac.y)ac:rotate(u):add(a4):round()ad:rotate(u):add(a4):round()if self.hp<1 then make_explosion(ac,I/2)if not a3 then add(particles,Spark.new(ac,random_angle(rnd(.25)+.25)+self.velocity_vector,color,128+random_int(32)))end else for aa in all(a9)do local ae=false
-if not a3 and(ac:about_equals(aa.screen_position)or aa.position2 and ac:about_equals(aa.position2))then ae=true elseif a3 and aa.last_offscreen_pos and ac:about_equals(aa.last_offscreen_pos)then ae=true end
-if ae then ab=aa.firing_ship
-local af=aa.damage or 1
-self.hp-=af
-if af>10 then make_explosion(ac)end
+function Ship:draw_sprite_rotated(a1,t)local a2=a1 or self.screen_position
+local w=t or self.angle_radians
+local G=self.sprite_rows
+local H=self.sprite_columns
+local a3=self.transparent_color
+if self.targeted then local a4=round(G/2)+4
+local a5,a6=self:targeted_color()if a1 then(a2+Vector(1,1)):draw_circle(a4,a6,true)a2:draw_circle(a4,0,true)end
+a2:draw_circle(a4,a5)end
+local a7={}for a8 in all(projectiles)do if a8.firing_ship~=self then if a8.sector_position and a1 and(self.sector_position-a8.sector_position):scaled_length()<=G or vector_long_distance(a8.screen_position,a2)<G then add(a7,a8)end end end
+local a9
+for l=1,H do for g=1,G do local m=self.sprite[g][l]if m~=a3 and m~=nil then local aa=Vector(G-g-flr(G/2),l-flr(H/2)-1)local ab=Vector(aa.x+1,aa.y)aa:rotate(w):add(a2):round()ab:rotate(w):add(a2):round()if self.hp<1 then make_explosion(aa,G/2,18,self.velocity_vector)if not a1 then add(particles,Spark.new(aa,random_angle(rnd(.25)+.25)+self.velocity_vector,m,128+random_int(32)))end else for a8 in all(a7)do local ac=false
+if not a1 and(aa:about_equals(a8.screen_position)or a8.position2 and aa:about_equals(a8.position2))then ac=true elseif a1 and a8.last_offscreen_pos and aa:about_equals(a8.last_offscreen_pos)then ac=true end
+if ac then a9=a8.firing_ship
+local ad=a8.damage or 1
+self.hp-=ad
+if ad>10 then make_explosion(aa,4,18,self.velocity_vector)end
+local ae=self.hp_percent
 self.hp_percent=self.hp/self.max_hp
-add(particles,Circle.new(ac,random_angle(),color,#damage_colors-3))if rnd()<.5 then add(particles,Spark.new(ac,random_angle(2*rnd()+1)+self.velocity_vector,color,128))end
-del(projectiles,aa)color=-random_int(#damage_colors)break end end
-if color<=0 then if-color<#damage_colors then color=-color+1
-self.sprite[f][j]=-color
-color=damage_colors[color] else color=5 end end
-rectfill(ac.x,ac.y,ad.x,ad.y,color)end end end end
-if ab then self.last_hit_time=secondcount
-self.last_hit_attacking_ship=ab end end
+if not self.npc and ae>.1 and self.hp_percent<=.1 then notification_add("thruster malfunction")end
+make_explosion(aa,2,6,self.velocity_vector)if rnd()<.5 then add(particles,Spark.new(aa,random_angle(2*rnd()+1)+self.velocity_vector,m,128))end
+del(projectiles,a8)self.sprite[g][l]=-5
+m=-5
+break end end
+if m<0 then m=5 end
+rectfill(aa.x,aa.y,ab.x,ab.y,m)end end end end
+if a9 then self.last_hit_time=secondcount
+self.last_hit_attacking_ship=a9 end end
 function Ship:turn_left()self:rotate(self.turn_rate)end
 function Ship:turn_right()self:rotate(-self.turn_rate)end
-function Ship:rotate(ag)self.angle=(self.angle+ag)%360
+function Ship:rotate(af)self.angle=(self.angle+af)%360
 self.angle_radians=self.angle/360
 self.heading=(450-self.angle)%360 end
-function Ship:draw()print_shadowed("prj:"..#projectiles,100,100)print_shadowed("cpu:"..stat(1),100,107)print_shadowed("ram:"..stat(0),100,114)local ah=11
-if self.hp_percent<=.3 then ah=9 end
-if self.hp_percent<=.1 then ah=8 end
-print_shadowed(self:hp_string(),0,0,ah,darkshipcolors[ah])print_shadowed(10*self.velocity.." pixels/sec",0,7)if self.accelerating then print_shadowed(self.current_gees.."gS",0,14)end
+function Ship:draw()print_shadowed("�"..self:hp_string(),0,0,self:hp_color())print_shadowed("pixels/sec "..format_float(10*self.velocity),0,7)if self.accelerating then print_shadowed(format_float(self.current_gees).." gS",0,14)end
 self:draw_sprite_rotated()end
-function Ship:hp_string()return"hp: "..self.hp.."/"..self.max_hp.." "..round(100*self.hp_percent).."%"end
-function Ship:is_visible(ai)local A=round(self.sprite_rows/2)local a4=(self.sector_position-ai+screen_center):round()self.screen_position=a4
-return a4.x<128+A and a4.x>0-A and a4.y<128+A and a4.y>0-A end
+local ag=split_number_string"8 8 9 9 10 10 10 11 11 11 "function Ship:hp_color()return ag[ceil(10*self.hp_percent)]end
+function Ship:hp_string()return round(100*self.hp_percent).."% "..self.hp.."/"..self.max_hp end
+function Ship:is_visible(ah)local ai=round(self.sprite_rows/2)local a2=(self.sector_position-ah+screen_center):round()self.screen_position=a2
+return a2.x<128+ai and a2.x>0-ai and a2.y<128+ai and a2.y>0-ai end
 function Ship:update_location()if self.velocity>0.0 then self.sector_position:add(self.velocity_vector)end end
 function Ship:reset_velocity()self.velocity_vector=Vector()self.velocity=0 end
 function Ship:predict_sector_position()local aj=self.sector_position:clone()if self.velocity>0 then aj:add(self.velocity_vector*4)end
@@ -165,8 +165,8 @@ if self:rotate_towards_heading(self.steering_velocity:angle())then self:apply_th
 if self.hostile then if ar<128 then self:fire_weapon()self:fire_missile()end end end
 function Ship:fly_towards_destination()self:update_steering_velocity()if self.distance_to_destination>self.max_distance_to_destination*.9 then if self:rotate_towards_heading(self.steering_velocity:angle())then self:apply_thrust()end else self.accelerating=false
 self:reverse_direction()if self.distance_to_destination<=self.max_distance_to_destination*.11 then self:order_done(self.full_stop)end end end
-function approach_nearest_planet()local V,W=nearest_planet()playership:approach_object(V)return false end
-function Ship:approach_object(av)local Z=av or thissector.planets[random_int(#thissector.planets)+1]self:set_destination(Z)self:reset_orders(self.fly_towards_destination)if self.velocity>0 then add(self.orders,self.full_stop)end end
+function approach_nearest_planet()local T,U=nearest_planet()playership:approach_object(T)return false end
+function Ship:approach_object(av)local X=av or thissector.planets[random_int(#thissector.planets)+1]self:set_destination(X)self:reset_orders(self.fly_towards_destination)if self.velocity>0 then add(self.orders,self.full_stop)end end
 function Ship:follow_current_order()local aw=self.orders[#self.orders]if aw then aw(self)end end
 function Ship:order_done(ax)self.orders[#self.orders]=ax end
 function Ship:reset_orders(ax)self.orders={}if ax then add(self.orders,ax)end end
@@ -184,12 +184,12 @@ self.current_deltav+=self.deltav/30
  else self.current_deltav=self.deltav end
 local aC=self.current_deltav
 if aB and aC>aB then aC=aB end
-if self.hp_percent<.15+rnd(.1)-.05 then aC=0 end
-self.current_gees=aC*300/9.806
-local u=self.angle_radians
-local aD=Vector(cos(u)*aC,sin(u)*aC)local aE=self.velocity_vector
+if self.hp_percent<=rnd(.1)then aC=0 end
+self.current_gees=aC*30.593514175
+local w=self.angle_radians
+local aD=Vector(cos(w)*aC,sin(w)*aC)local aE=self.velocity_vector
 local aF
-local aG=rotated_vector(u,self.sprite_rows*-.5)+self.screen_position
+local aG=rotated_vector(w,self.sprite_rows*-.5)+self.screen_position
 add(particles,ThrustExhaust.new(aG,aD*-1.3*self.sprite_rows))aE:add(aD)aF=aE:length()self.velocity_angle=aE:angle()self.velocity_angle_opposite=(self.velocity_angle+0.5)%1
 if aF<.05 then aF=0.0
 aE=Vector()end
@@ -201,301 +201,303 @@ if aI~=0 then local aJ=self.turn_rate*aI/abs(aI)if abs(aI)>abs(aJ)then aI=aJ end
 self:rotate(aI)end
 return aI<0.1 and aI>-.1 end
 HomingWeapon={}HomingWeapon.__index=HomingWeapon
-function HomingWeapon.new(aK,aL)local aM=(aK.angle_radians+.25)%1
-return setmetatable({sector_position=aK.sector_position:clone(),screen_position=aK.screen_position:clone(),velocity_vector=rotated_vector(aM,.5)+aK.velocity_vector,velocity=aK.velocity,target=aL,sprite_rows=1,firing_ship=aK,current_deltav=.1,deltav=.1,hp_percent=1,duration=512,damage=20},HomingWeapon)end
-function HomingWeapon:draw(aN,a3)local a4=a3 or self.screen_position
-self.last_offscreen_pos=a3
-self.destination=self.target:predict_sector_position()self:update_steering_velocity()self.angle_radians=self.steering_velocity:angle()if self.duration<500 then self:apply_thrust(abs(self.steering_velocity:length()))end
+function HomingWeapon.new(aK,aL)return setmetatable({sector_position=aK.sector_position:clone(),screen_position=aK.screen_position:clone(),velocity_vector=rotated_vector((aK.angle_radians+.25)%1,.5)+aK.velocity_vector,velocity=aK.velocity,target=aL,sprite_rows=1,firing_ship=aK,current_deltav=.1,deltav=.1,hp_percent=1,duration=512,damage=20},HomingWeapon)end
+function HomingWeapon:update()self.destination=self.target:predict_sector_position()self:update_steering_velocity()self.angle_radians=self.steering_velocity:angle()if self.duration<500 then self:apply_thrust(abs(self.steering_velocity:length()))end
 self.duration-=1
-self:update_location()if self:is_visible(playership.sector_position)or a3 then a4:draw_line(a4+rotated_vector(self.angle_radians,4),6)end end
+self:update_location()end
+function HomingWeapon:draw(aM,a1)local a2=a1 or self.screen_position
+self.last_offscreen_pos=a1
+if self:is_visible(playership.sector_position)or a1 then a2:draw_line(a2+rotated_vector(self.angle_radians,4),6)end end
 setmetatable(HomingWeapon,{__index=Ship})Star={}Star.__index=Star
 function Star.new()return setmetatable({position=Vector(),color=7,speed=1},Star)end
-function Star:reset(f,j)self.position=Vector(f or random_int(128),j or random_int(128))self.color=random_int(#star_colors[star_color_monochrome+star_color_index+1])+1
+function Star:reset(g,l)self.position=Vector(g or random_int(128),l or random_int(128))self.color=random_int(#star_colors[star_color_monochrome+star_color_index+1])+1
 self.speed=rnd(0.75)+0.25
 return self end
-sun_colors={split_number_string"6 14 10 9 13 ",split_number_string"7 8 9 10 12 "}Sun={}Sun.__index=Sun
-function Sun.new(l,f,j)local aJ=l or 64+random_int(128)local t=random_int(6,1)return setmetatable({screen_position=Vector(),radius=aJ,sun_color_index=t,color=sun_colors[2][t],sector_position=Vector(f or 0,j or 0)},Sun)end
-function stellar_object_is_visible(Z,aO)Z.screen_position=Z.sector_position-aO+screen_center
-return Z.screen_position.x<128+Z.radius and Z.screen_position.x>0-Z.radius and Z.screen_position.y<128+Z.radius and Z.screen_position.y>0-Z.radius end
-function Sun:draw(aO)if stellar_object_is_visible(self,aO)then for d=0,1 do self.screen_position:draw_circle(self.radius-d*3,sun_colors[d+1][self.sun_color_index],true)end end end
-starfield_count=50
+sun_colors=split_number_string"6 14 10 9 13 7 8 9 10 12 "Sun={}Sun.__index=Sun
+function Sun.new(o,g,l)local aJ=o or 64+random_int(128)local v=random_int(6,1)return setmetatable({screen_position=Vector(),radius=aJ,sun_color_index=v,color=sun_colors[v+5],sector_position=Vector(g or 0,l or 0)},Sun)end
+function Sun:draw(aN)if stellar_object_is_visible(self,aN)then for e=0,1 do self.screen_position:draw_circle(self.radius-e*3,sun_colors[e*5+self.sun_color_index],true)end end end
+function stellar_object_is_visible(X,aN)X.screen_position=X.sector_position-aN+screen_center
+return X.screen_position.x<128+X.radius and X.screen_position.x>0-X.radius and X.screen_position.y<128+X.radius and X.screen_position.y>0-X.radius end
+starfield_count=40
 Sector={}Sector.__index=Sector
-function Sector.new()local aP={seed=random_int(32767),planets={},starfield={}}srand(aP.seed)for d=1,starfield_count do add(aP.starfield,Star.new():reset())end
-setmetatable(aP,Sector)return aP end
-function Sector:reset_planet_visibility()for X in all(self.planets)do X.rendered_circle=false
-X.rendered_terrain=false end end
-function Sector:new_planet_along_elipse()local f
-local j
-local aQ
-local aR=true
-while aR do f=rnd(150)j=sqrt((rnd(35)+40)^2*(1-f^2/(rnd(50)+100)^2))if rnd()<.5 then 
-f*=-1
+function Sector.new()local aO={seed=random_int(32767),planets={},starfield={}}srand(aO.seed)for e=1,starfield_count do add(aO.starfield,Star.new():reset())end
+setmetatable(aO,Sector)return aO end
+function Sector:reset_planet_visibility()for V in all(self.planets)do V.rendered_circle=false
+V.rendered_terrain=false end end
+function Sector:new_planet_along_elipse()local g
+local l
+local aP
+local aQ=true
+while aQ do g=rnd(150)l=sqrt((rnd(35)+40)^2*(1-g^2/(rnd(50)+100)^2))if rnd()<.5 then 
+g*=-1
  end
 if rnd()<.75 then 
-j*=-1
+l*=-1
  end
 if#self.planets==0 then break end
-aQ=32767
-for X in all(self.planets)do aQ=min(aQ,Vector.distance(Vector(f,j),X.sector_position/33))end
-aR=aQ<15 end
-return Planet.new(f*33,j*33,(1-Vector(f,j):angle()-.25)%1)end
-function Sector:draw_starfield(aN)local aS
-local aT
-for aU in all(self.starfield)do aS=aU.position+aN*aU.speed*-.5
-aT=aU.position+aN*aU.speed*.5
-local d=star_color_monochrome+star_color_index+1
-local aV=#star_colors[d]local aW=1+(aU.color-1)%aV
-aU.position:draw_line(aT,star_colors[d+1][aW])aS:draw_line(aU.position,star_colors[d][aW])end end
-function Sector:scroll_starfield(aN)local aX=starfield_count-#self.starfield
-for d=1,aX do add(self.starfield,Star.new():reset())end
-for aU in all(self.starfield)do aU.position:add(aN*aU.speed*-1)if aX<0 then del(self.starfield,aU)aX=aX+1 elseif aU.position.x>134 then aU:reset(-6) elseif aU.position.x<-6 then aU:reset(134) elseif aU.position.y>134 then aU:reset(false,-6) elseif aU.position.y<-6 then aU:reset(false,134)end end end
-function is_offscreen(X,i)local aY=i or 0
-local aZ=0-aY
-local a_=128+aY
-local f=X.screen_position.x
-local j=X.screen_position.y
-if X.deltav then return X.duration<0 else return X.duration<0 or f>a_ or f<aZ or j>a_ or j<aZ end end
+aP=32767
+for V in all(self.planets)do aP=min(aP,vector_long_distance(Vector(g,l),V.sector_position/33))end
+aQ=aP<15 end
+return Planet.new(g*33,l*33,(1-Vector(g,l):angle()-.25)%1)end
+function Sector:draw_starfield(aM)local aR
+local aS
+for aT in all(self.starfield)do aR=aT.position+aM*aT.speed*-.5
+aS=aT.position+aM*aT.speed*.5
+local e=star_color_monochrome+star_color_index+1
+local aU=#star_colors[e]local aV=1+(aT.color-1)%aU
+aT.position:draw_line(aS,star_colors[e+1][aV])aR:draw_line(aT.position,star_colors[e][aV])end end
+function Sector:scroll_starfield(aM)local aW=starfield_count-#self.starfield
+for e=1,aW do add(self.starfield,Star.new():reset())end
+for aT in all(self.starfield)do aT.position:add(aM*aT.speed*-1)if aW<0 then del(self.starfield,aT)aW=aW+1 elseif aT.position.x>134 then aT:reset(-6) elseif aT.position.x<-6 then aT:reset(134) elseif aT.position.y>134 then aT:reset(false,-6) elseif aT.position.y<-6 then aT:reset(false,134)end end end
+function is_offscreen(V,j)local aX=j or 0
+local aY=0-aX
+local aZ=128+aX
+local g=V.screen_position.x
+local l=V.screen_position.y
+local a_=V.duration<0
+if V.deltav then return a_ else return a_ or g>aZ or g<aY or l>aZ or l<aY end end
 Spark={}Spark.__index=Spark
-function Spark.new(X,b0,t,Y)return setmetatable({screen_position=X,particle_velocity=b0,color=t,duration=Y or random_int(7,2)},Spark)end
-function Spark:update(aN)self.screen_position:add(self.particle_velocity-aN)
+function Spark.new(V,b0,v,W)return setmetatable({screen_position=V,particle_velocity=b0,color=v,duration=W or random_int(7,2)},Spark)end
+function Spark:update(aM)self.screen_position:add(self.particle_velocity-aM)
 self.duration-=1
  end
-function Spark:draw(aN)pset(self.screen_position.x,self.screen_position.y,self.color)self:update(aN)end
-Circle={}Circle.__index=Circle
-function Circle.new(X,b0,t,Y,b1)return setmetatable({screen_position=X:clone(),particle_velocity=b0,color=t,center_position=b1 or X:clone(),duration=Y},Circle)end
-function Circle:draw(aN)local b2=flr(Vector.distance(self.screen_position,self.center_position))for d=b2+3,b2,-1 do local t=damage_colors2[#damage_colors2-3-self.duration+d]if t then self.center_position:draw_circle(d,t,true)end end
-self:update(aN)end
-setmetatable(Circle,{__index=Spark})function make_explosion(ac,A)local b3=random_angle()add(particles,Circle.new(ac,b3*rnd(.5),color,#damage_colors2-3,b3*(A or 4)+ac))end
-MultiCannon={}MultiCannon.__index=MultiCannon
-function MultiCannon.new(X,b0,t,_)local b4=b0:perpendicular():normalize()*(rnd(2)-1)return setmetatable({screen_position=X,position2=X:clone(),particle_velocity=b0+b4,color=t,firing_ship=_,duration=16},MultiCannon)end
-function MultiCannon:draw(aN)self:update(aN)self.position2:draw_line(self.screen_position,self.color)self.position2=self.screen_position:clone()end
+function Spark:draw(aM)pset(self.screen_position.x,self.screen_position.y,self.color)self:update(aM)end
+damage_colors=split_number_string"7 10 9 8 5 0 7 10 9 8 5 0 7 10 9 8 5 0 "function make_explosion(aa,ai,b1,b2)add(particles,Explosion.new(aa,ai,b1,b2))end
+Explosion={}Explosion.__index=Explosion
+function Explosion.new(b3,ai,b1,aM)local b4=rnd()return setmetatable({screen_position=b3:clone(),particle_velocity=aM:clone(),radius=b4*ai,radius_delta=b4*rnd(.5),len=b1-3,duration=b1},Explosion)end
+function Explosion:draw(aM)local aJ=round(self.radius)for e=aJ+3,aJ,-1 do local v=damage_colors[self.len-self.duration+e]if v then self.screen_position:draw_circle(e,v,true)end end
+self:update(aM)
+self.radius-=self.radius_delta
+ end
+setmetatable(Explosion,{__index=Spark})MultiCannon={}MultiCannon.__index=MultiCannon
+function MultiCannon.new(V,b0,v,Y)return setmetatable({screen_position=V,position2=V:clone(),particle_velocity=b0+b0:perpendicular():normalize()*(rnd(2)-1),color=v,firing_ship=Y,duration=16},MultiCannon)end
+function MultiCannon:draw(aM)self.position2:draw_line(self.screen_position,self.color)self.position2=self.screen_position:clone()end
 setmetatable(MultiCannon,{__index=Spark})ThrustExhaust={}ThrustExhaust.__index=ThrustExhaust
-function ThrustExhaust.new(X,b0)return setmetatable({screen_position=X,particle_velocity=b0,duration=0},ThrustExhaust)end
-function ThrustExhaust:draw(aN)local t=random_int(11,9)local b0=self.particle_velocity
-local b4=b0:perpendicular()*0.7
-local b5=b0*(rnd(2)+2)+b4*(rnd()-.5)local b6=self.screen_position+b5
-local b7=self.screen_position+b0+b4
-local b8=self.screen_position+b0+b4*-1
-local b9=self.screen_position
-b7:draw_line(b6,t)b8:draw_line(b6,t)b8:draw_line(b9,t)b7:draw_line(b9,t)if rnd()>.4 then add(particles,Spark.new(b6,aN+b5*.25,t))end
-self.screen_position:add(b0-aN)
+function ThrustExhaust.new(V,b0)return setmetatable({screen_position=V,particle_velocity=b0,duration=0},ThrustExhaust)end
+function ThrustExhaust:draw(aM)local v=random_int(11,9)local b0=self.particle_velocity
+local b5=b0:perpendicular()*0.7
+local b6=b0*(rnd(2)+2)+b5*(rnd()-.5)local b7=self.screen_position+b6
+local b8=self.screen_position+b0+b5
+local b9=self.screen_position+b0+b5*-1
+local ba=self.screen_position
+b8:draw_line(b7,v)b9:draw_line(b7,v)b9:draw_line(ba,v)b8:draw_line(ba,v)if rnd()>.4 then add(particles,Spark.new(b7,aM+b6*.25,v))end
+self.screen_position:add(b0-aM)
 self.duration-=1
  end
-function draw_circle(ba,bb,l,m,color)local bc={}local bd=not m
-local be=0
+function draw_circle(bb,bc,o,p,m)local bd={}local be=not p
 local bf=0
-local f=-l
-local j=0
-local bg=2-2*l
-while f<0 do bc[1+f*-1]=j
-if bd then be=f
-bf=j end
-for d=f,be do sset(ba-d,bb+j,color)sset(ba+d,bb-j,color)end
-for d=bf,j do sset(ba-d,bb-f,color)sset(ba+d,bb+f,color)end
-l=bg
-if l<=j then 
-j+=1
-bg+=j*2+1
+local bg=0
+local g=-o
+local l=0
+local bh=2-2*o
+while g<0 do bd[1+g*-1]=l
+if be then bf=g
+bg=l end
+for e=g,bf do sset(bb-e,bc+l,m)sset(bb+e,bc-l,m)end
+for e=bg,l do sset(bb-e,bc-g,m)sset(bb+e,bc+g,m)end
+o=bh
+if o<=l then 
+l+=1
+bh+=l*2+1
  end
-if l>f or bg>j then 
-f+=1
-bg+=f*2+1
+if o>g or bh>l then 
+g+=1
+bh+=g*2+1
  end end
-bc[1]=bc[2]return bc end
-function draw_moon_at_ycoord(bh,bi,bj,l,bk,bc,bl)local f
-local j
-local bm
+bd[1]=bd[2]return bd end
+function draw_moon_at_ycoord(bi,bj,bk,o,bl,bd,bm)local g
+local l=o-bi
 local bn
 local bo
-local d
 local bp
+local e
 local bq
-j=l-bh
-local br=abs(j)+1
-if br<=#bc then f=flr(sqrt(l*l-j*j))bm=2*f
-if bk<.5 then bn=-bc[br]bo=flr(bm-2*bk*bm-f) else bn=flr(f-2*bk*bm+bm)bo=bc[br]end
-for d=bn,bo do if not bl or bk<.5 and d>bo-2 or bk>=.5 and d<bn+2 then bp=dark_planet_colors[sget(bi+d,bj-j)+1] else bp=0 end
-sset(bi+d,bj-j,bp)end end end
-perms={}for d=0,255 do perms[d]=d end
-for d=0,255 do local aJ=random_int(32767)%256
-perms[d],perms[aJ]=perms[aJ],perms[d]end
-local bs={}for d=0,255 do local f=perms[d]%12
-perms[d+256],bs[d],bs[d+256]=perms[d],f,f end
-function GetN_3d(bt,bu,bv,f,j,bw)local a=.6-f*f-j*j-bw*bw
-local bx=bs[bt+perms[bu+perms[bv]]]return max(0,a*a*a*a)*(e[bx][0]*f+e[bx][1]*j+e[bx][2]*bw)end
-function Simplex3D(f,j,bw)local s=(f+j+bw)*0.333333333
-local bt,bu,bv=flr(f+s),flr(j+s),flr(bw+s)local a=(bt+bu+bv)*0.166666667
-local by=f+a-bt
-local bz=j+a-bu
-local bA=bw+a-bv
-bt,bu,bv=band(bt,255),band(bu,255),band(bv,255)local bB=GetN_3d(bt,bu,bv,by,bz,bA)local bC=GetN_3d(bt+1,bu+1,bv+1,by-0.5,bz-0.5,bA-0.5)local bD,bE,bF,bG,bH,bI
-if by>=bz then if bz>=bA then bD,bE,bF,bG,bH,bI=1,0,0,1,1,0 elseif by>=bA then bD,bE,bF,bG,bH,bI=1,0,0,1,0,1 else bD,bE,bF,bG,bH,bI=0,0,1,1,0,1 end else if bz<bA then bD,bE,bF,bG,bH,bI=0,0,1,0,1,1 elseif by<bA then bD,bE,bF,bG,bH,bI=0,1,0,0,1,1 else bD,bE,bF,bG,bH,bI=0,1,0,1,1,0 end end
-local bJ=GetN_3d(bt+bD,bu+bE,bv+bF,by+0.166666667-bD,bz+0.166666667-bE,bA+0.166666667-bF)local bK=GetN_3d(bt+bG,bu+bH,bv+bI,by+0.333333333-bG,bz+0.333333333-bH,bA+0.333333333-bI)return 32*(bB+bJ+bK+bC)end
-function create_planet_type(bL,bM,bN,bO,bP,bQ,bR,bS)return{class_name=bL,noise_octaves=bM,noise_zoom=bN,noise_persistance=bO,transparent_color=bS or 14,minimap_color=bP,full_shadow=bR or"yes",color_map=bQ}end
-planet_types={create_planet_type("tundra",5,.5,.6,6,split_number_string"7 6 5 4 5 6 7 6 5 4 3 "),create_planet_type("desert",5,.35,.3,9,split_number_string"4 4 9 9 4 4 9 9 4 4 9 9 11 1 9 4 9 9 4 9 9 4 9 9 4 9 9 4 9 "),create_planet_type("barren",5,.55,.35,5,split_number_string"5 6 5 0 5 6 7 6 5 0 5 6 "),create_planet_type("lava",5,.55,.65,4,split_number_string"0 4 0 5 0 4 0 4 9 8 4 0 4 0 5 0 4 0 "),create_planet_type("gas giant",1,.4,.75,2,split_number_string"7 6 13 1 2 1 12 "),create_planet_type("gas giant",1,.4,.75,8,split_number_string"7 15 14 2 1 2 8 8 ",nil,12),create_planet_type("gas giant",1,.7,.75,10,split_number_string"15 10 9 4 9 10 "),create_planet_type("terran",5,.3,.65,11,split_number_string"1 1 1 1 1 1 1 13 12 15 11 11 3 3 3 4 5 6 7 ","partial shadow"),create_planet_type("island",5,.55,.65,12,split_number_string"1 1 1 1 1 1 1 1 13 12 15 11 3 ","partial shadow")}Planet={}Planet.__index=Planet
-function Planet.new(f,j,bk,aJ)local bT=planet_types[random_int(#planet_types)+1]local bU=bT.noise_factor_vert or 1
-if bT.class_name=="gas giant"then bT.min_size=50
-bU=4
-if rnd()<.5 then bU=20 end end
-local bV=bT.min_size or 10
-local l=aJ or random_int(65,bV)return setmetatable({screen_position=Vector(),radius=l,sector_position=Vector(f,j),bottom_right_coord=2*l-1,phase=bk,planet_type=bT,noise_factor_vert=bU,noisedx=rnd(1024),noisedy=rnd(1024),noisedz=rnd(1024),rendered_circle=false,rendered_terrain=false,color=bT.minimap_color},Planet)end
-function Planet:draw(aO)if stellar_object_is_visible(self,aO)then self:render_a_bit_to_sprite_sheet()sspr(0,0,self.bottom_right_coord,self.bottom_right_coord,self.screen_position.x-self.radius,self.screen_position.y-self.radius)end end
-function draw_rect(bW,bX,t)for f=0,bW-1 do for j=0,bX-1 do sset(f,j,t)end end end
-function Planet:render_a_bit_to_sprite_sheet(bY,bZ)local l=self.radius-1
-if bY then l=47 end
+local br
+local bs=abs(l)+1
+if bs<=#bd then g=flr(sqrt(o*o-l*l))bn=2*g
+if bl<.5 then bo=-bd[bs]bp=flr(bn-2*bl*bn-g) else bo=flr(g-2*bl*bn+bn)bp=bd[bs]end
+for e=bo,bp do if not bm or bl<.5 and e>bp-2 or bl>=.5 and e<bo+2 then bq=dark_planet_colors[sget(bj+e,bk-l)+1] else bq=0 end
+sset(bj+e,bk-l,bq)end end end
+perms={}for e=0,255 do perms[e]=e end
+for e=0,255 do local aJ=random_int(32767)%256
+perms[e],perms[aJ]=perms[aJ],perms[e]end
+local bt={}for e=0,255 do local g=perms[e]%12
+perms[e+256],bt[e],bt[e+256]=perms[e],g,g end
+function GetN_3d(bu,bv,bw,g,l,bx)local b=.6-g*g-l*l-bx*bx
+local by=bt[bu+perms[bv+perms[bw]]]return max(0,b*b*b*b)*(f[by][0]*g+f[by][1]*l+f[by][2]*bx)end
+function Simplex3D(g,l,bx)local a=(g+l+bx)*0.333333333
+local bu,bv,bw=flr(g+a),flr(l+a),flr(bx+a)local b=(bu+bv+bw)*0.166666667
+local bz=g+b-bu
+local bA=l+b-bv
+local bB=bx+b-bw
+bu,bv,bw=band(bu,255),band(bv,255),band(bw,255)local bC=GetN_3d(bu,bv,bw,bz,bA,bB)local bD=GetN_3d(bu+1,bv+1,bw+1,bz-0.5,bA-0.5,bB-0.5)local bE,bF,bG,bH,bI,bJ
+if bz>=bA then if bA>=bB then bE,bF,bG,bH,bI,bJ=1,0,0,1,1,0 elseif bz>=bB then bE,bF,bG,bH,bI,bJ=1,0,0,1,0,1 else bE,bF,bG,bH,bI,bJ=0,0,1,1,0,1 end else if bA<bB then bE,bF,bG,bH,bI,bJ=0,0,1,0,1,1 elseif bz<bB then bE,bF,bG,bH,bI,bJ=0,1,0,0,1,1 else bE,bF,bG,bH,bI,bJ=0,1,0,1,1,0 end end
+local bK=GetN_3d(bu+bE,bv+bF,bw+bG,bz+0.166666667-bE,bA+0.166666667-bF,bB+0.166666667-bG)local bL=GetN_3d(bu+bH,bv+bI,bw+bJ,bz+0.333333333-bH,bA+0.333333333-bI,bB+0.333333333-bJ)return 32*(bC+bK+bL+bD)end
+function create_planet_type(bM,bN,bO,bP,bQ)local bR=split_number_string(bN)return{class_name=bM,noise_octaves=bR[1],noise_zoom=bR[2],noise_persistance=bR[3],minimap_color=bR[4],transparent_color=bQ or 14,full_shadow=bP or"yes",color_map=split_number_string(bO)}end
+planet_types={create_planet_type("tundra","5 .5 .6 6 ","7 6 5 4 5 6 7 6 5 4 3 "),create_planet_type("desert","5 .35 .3 9 ","4 4 9 9 4 4 9 9 4 4 9 9 11 1 9 4 9 9 4 9 9 4 9 9 4 9 9 4 9 "),create_planet_type("barren","5 .55 .35 5 ","5 6 5 0 5 6 7 6 5 0 5 6 "),create_planet_type("lava","5 .55 .65 4 ","0 4 0 5 0 4 0 4 9 8 4 0 4 0 5 0 4 0 "),create_planet_type("gas giant","1 .4 .75 2 ","7 6 13 1 2 1 12 "),create_planet_type("gas giant","1 .4 .75 8 ","7 15 14 2 1 2 8 8 ",nil,12),create_planet_type("gas giant","1 .7 .75 10 ","15 10 9 4 9 10 "),create_planet_type("terran","5 .3 .65 11 ","1 1 1 1 1 1 1 13 12 15 11 11 3 3 3 4 5 6 7 ","partial shadow"),create_planet_type("island","5 .55 .65 12 ","1 1 1 1 1 1 1 1 13 12 15 11 3 ","partial shadow")}Planet={}Planet.__index=Planet
+function Planet.new(g,l,bl,aJ)local bS=planet_types[random_int(#planet_types)+1]local bT=bS.noise_factor_vert or 1
+if bS.class_name=="gas giant"then bS.min_size=50
+bT=4
+if rnd()<.5 then bT=20 end end
+local bU=bS.min_size or 10
+local o=aJ or random_int(65,bU)return setmetatable({screen_position=Vector(),radius=o,sector_position=Vector(g,l),bottom_right_coord=2*o-1,phase=bl,planet_type=bS,noise_factor_vert=bT,noisedx=rnd(1024),noisedy=rnd(1024),noisedz=rnd(1024),rendered_circle=false,rendered_terrain=false,color=bS.minimap_color},Planet)end
+function Planet:draw(aN)if stellar_object_is_visible(self,aN)then self:render_a_bit_to_sprite_sheet()sspr(0,0,self.bottom_right_coord,self.bottom_right_coord,self.screen_position.x-self.radius,self.screen_position.y-self.radius)end end
+function draw_rect(bV,bW,v)for g=0,bV-1 do for l=0,bW-1 do sset(g,l,v)end end end
+function Planet:render_a_bit_to_sprite_sheet(bX,bY)local o=self.radius-1
+if bX then o=47 end
 if not self.rendered_circle then self.width=self.radius*2
 self.height=self.radius*2
 self.x=0
 self.yfromzero=0
-self.y=l-self.yfromzero
+self.y=o-self.yfromzero
 self.phi=0
-thissector:reset_planet_visibility()pal()palt(0,false)palt(self.planet_type.transparent_color,true)if bY then self.width=114
+thissector:reset_planet_visibility()pal()palt(0,false)palt(self.planet_type.transparent_color,true)if bX then self.width=114
 self.height=96
-draw_rect(self.width,self.height,0) else draw_rect(self.width,self.height,self.planet_type.transparent_color)self.bxs=draw_circle(l,l,l,true,0)draw_circle(l,l,l,false,self.planet_type.minimap_color)end
+draw_rect(self.width,self.height,0) else draw_rect(self.width,self.height,self.planet_type.transparent_color)self.bxs=draw_circle(o,o,o,true,0)draw_circle(o,o,o,false,self.planet_type.minimap_color)end
 self.rendered_circle=true end
-if not self.rendered_terrain and self.rendered_circle then local b_=0
-local c0=.5
-local c1=c0/self.width
-if bY and bZ then b_=.5
-c0=1 end
-if self.phi<=.25 then for c2=b_,c0-c1,c1 do if sget(self.x,self.y)~=self.planet_type.transparent_color then local c3=self.planet_type.noise_zoom
-local c4=0
-local c5=1
-local c6=0
-for g=1,self.planet_type.noise_octaves do c6=c6+Simplex3D(self.noisedx+c3*cos(self.phi)*cos(c2),self.noisedy+c3*cos(self.phi)*sin(c2),self.noisedz+c3*sin(self.phi)*self.noise_factor_vert)c4=c4+c5
-c5=c5*self.planet_type.noise_persistance
-c3=c3*2 end
-c6=c6/c4
-if c6>1 then c6=1 end
-if c6<-1 then c6=-1 end
-c6=c6+1
-c6=c6*(#self.planet_type.color_map-1)/2
-c6=round(c6)sset(self.x,self.y,self.planet_type.color_map[c6+1])end
+if not self.rendered_terrain and self.rendered_circle then local bZ=0
+local b_=.5
+local c0=b_/self.width
+if bX and bY then bZ=.5
+b_=1 end
+if self.phi<=.25 then for c1=bZ,b_-c0,c0 do if sget(self.x,self.y)~=self.planet_type.transparent_color then local c2=self.planet_type.noise_zoom
+local c3=0
+local c4=1
+local c5=0
+for h=1,self.planet_type.noise_octaves do c5=c5+Simplex3D(self.noisedx+c2*cos(self.phi)*cos(c1),self.noisedy+c2*cos(self.phi)*sin(c1),self.noisedz+c2*sin(self.phi)*self.noise_factor_vert)c3=c3+c4
+c4=c4*self.planet_type.noise_persistance
+c2=c2*2 end
+c5=c5/c3
+if c5>1 then c5=1 end
+if c5<-1 then c5=-1 end
+c5=c5+1
+c5=c5*(#self.planet_type.color_map-1)/2
+c5=round(c5)sset(self.x,self.y,self.planet_type.color_map[c5+1])end
 self.x+=1
  end
-if not bY then draw_moon_at_ycoord(self.y,l,l,l,self.phase,self.bxs,self.planet_type.full_shadow=="yes")end
+if not bX then draw_moon_at_ycoord(self.y,o,o,o,self.phase,self.bxs,self.planet_type.full_shadow=="yes")end
 self.x=0
 if self.phi>=0 then 
 self.yfromzero+=1
-self.y=l+self.yfromzero
+self.y=o+self.yfromzero
 self.phi+=.5/(self.height-1) else
- self.y=l-self.yfromzero end
+ self.y=o-self.yfromzero end
 self.phi*=-1
  else self.rendered_terrain=true end end
 return self.rendered_terrain end
-function add_npc(X)local c7=X or playership
-local c8=Ship.new(2,4):generate_random_ship()c8:set_position_near_object(c7)c8.npc=true
-add(npcships,c8)c8.index=#npcships
-if c8.ship_type.name~="freighter"and rnd()<.2 then c8.hostile=true end end
-function load_sector()thissector=Sector.new()notifications:cancel_all()notifications:add("arriving in system ngc "..thissector.seed)add(thissector.planets,Sun.new())for d=0,random_int(12)do add(thissector.planets,thissector:new_planet_along_elipse())end
-playership:set_position_near_object(thissector.planets[2])playership:clear_target()npcships={}for X in all(thissector.planets)do for d=1,random_int(4)do add_npc(X)end end
+function add_npc(V)local b3=V or playership
+local c6=Ship.new():generate_random_ship()c6:set_position_near_object(b3)c6.npc=true
+add(npcships,c6)c6.index=#npcships
+if c6.ship_type.name~="freighter"and c6.ship_type.name~="super freighter"and rnd()<.2 then c6.hostile=true end end
+function load_sector()thissector=Sector.new()notification_add("arriving in system ngc "..thissector.seed)add(thissector.planets,Sun.new())for e=0,random_int(12)do add(thissector.planets,thissector:new_planet_along_elipse())end
+playership:set_position_near_object(thissector.planets[2])playership:clear_target()npcships={}for V in all(thissector.planets)do for e=1,random_int(4)do add_npc(V)end end
 return true end
 function _init()paused=false
 landed=false
-particles={}projectiles={}notifications=Notification.new()playership=Ship.new()playership:generate_random_ship()load_sector()setup_minimap()show_title_screen=true
-local c9=Vector(0,-3)while not btnp(4)do cls()thissector:scroll_starfield(c9)thissector:draw_starfield(c9)circfill(64,135,90,2)circfill(64,172,122,0)map(0,0,6,-15)print("\n\n    � � thrust      � � fire\n  �  � � rotate  � � menu\n    � � reverse",0,70,7)flip()end end
-minimap_sizes={16,32,48,128,false}function setup_minimap(A)minimap_size_index=A or 0
+particles={}projectiles={}playership=Ship.new()playership:generate_random_ship()load_sector()setup_minimap()show_title_screen=true
+local c7=Vector(0,-3)while not btnp(4)do cls()thissector:scroll_starfield(c7)thissector:draw_starfield(c7)circfill(64,135,90,2)circfill(64,172,122,0)map(0,0,6,-15)print_shadowed("\n\n    � � thrust      � � fire\n  �  � � rotate  � � menu\n    � � reverse",0,70,6,true)flip()end end
+minimap_sizes={16,32,48,128,false}function setup_minimap(ai)minimap_size_index=ai or 0
 minimap_size=minimap_sizes[minimap_size_index+1]if minimap_size then minimap_size_halved=minimap_size/2
 minimap_offset=Vector(126-minimap_size_halved,minimap_size_halved+1)end end
-function draw_minimap_planet(Z)local c7=Z.sector_position+screen_center
-if Z.planet_type then c7:add(Vector(-Z.radius,-Z.radius))end
-c7=c7/minimap_denominator+minimap_offset
-if minimap_size>100 then local aJ=ceil(Z.radius/32)c7:draw_circle(aJ+1,Z.color) else c7:draw_point(Z.color)end end
-function draw_minimap_ship(Z)local ca=(Z.sector_position/minimap_denominator):add(minimap_offset):round()local color=Z:targeted_color()if Z.npc then ca:draw_point(color)if Z.targeted then ca:draw_circle(2,color)end else rect(ca.x-1,ca.y-1,ca.x+1,ca.y+1,15)end end
-function draw_minimap()if minimap_size then if minimap_size<100 then rectfill(126-minimap_size,1,126,minimap_size+1,0)rect(125-minimap_size,0,127,minimap_size+2,6,11)end
-local f=abs(playership.sector_position.x)local j=abs(playership.sector_position.y)if j>f then f=j end
-local cb=min(6,flr(f/5000)+1)minimap_denominator=cb*5000/minimap_size_halved
-for X in all(thissector.planets)do draw_minimap_planet(X)end
-if framecount%3~=0 then for cc in all(projectiles)do if cc.deltav then draw_minimap_ship(cc)end end
-for _ in all(npcships)do draw_minimap_ship(_)end
-draw_minimap_ship(playership)end end end
-outlined_text_draw_points=split_number_string"-1 -1 1 -1 -1 1 -1 0 1 0 0 -1 0 1 "function print_shadowed(cd,f,j,color,ce,cf)local t=color or 6
-local s=ce or 5
-if cf then for d=1,#outlined_text_draw_points,2 do print(cd,f+outlined_text_draw_points[d],j+outlined_text_draw_points[d+1],s)end end
-print(cd,f+1,j+1,s)print(cd,f,j,t)end
-Notification={}Notification.__index=Notification
-function Notification.new()return setmetatable({messages={},display_time=4},Notification)end
-function Notification:add(cd)add(self.messages,cd)end
-function Notification:cancel_current()del(self.messages,self.messages[1])self.display_time=4 end
-function Notification:cancel_all(cd)if cd then del(self.messages,cd) else self.messages={}end
-self.display_time=4 end
-function Notification:draw()if#self.messages>0 then print_shadowed(self.messages[1],0,121)if framecount==29 then 
-self.display_time-=1
- end
-if self.display_time<1 then self:cancel_current()end end end
-function call_option(d)if current_option_callbacks[d]then local cg=current_option_callbacks[d]()paused=false
-if cg==nil then paused=true elseif cg then display_menu(nil,nil,d)if type(cg)=="string"then print_shadowed(cg,64-round(4*#cg/2),40,11,0,true)end
+function draw_minimap_planet(X)local b3=X.sector_position+screen_center
+if X.planet_type then b3:add(Vector(-X.radius,-X.radius))end
+b3=b3/minimap_denominator+minimap_offset
+if minimap_size>100 then local aJ=ceil(X.radius/32)b3:draw_circle(aJ+1,X.color) else b3:draw_point(X.color)end end
+function draw_minimap_ship(X)local c8=(X.sector_position/minimap_denominator):add(minimap_offset):round()local m=X:targeted_color()if X.npc then c8:draw_point(m)if X.targeted then c8:draw_circle(2,m)end else rect(c8.x-1,c8.y-1,c8.x+1,c8.y+1,15)end end
+function draw_minimap()local c9=minimap_size or 0
+if minimap_size then if minimap_size>0 and minimap_size<100 then c9=c9+4
+rectfill(126-minimap_size,1,126,minimap_size+1,0)rect(125-minimap_size,0,127,minimap_size+2,6,11) else c9=0 end
+local g=abs(playership.sector_position.x)local l=abs(playership.sector_position.y)if l>g then g=l end
+local ca=min(6,flr(g/5000)+1)minimap_denominator=ca*5000/minimap_size_halved
+for V in all(thissector.planets)do draw_minimap_planet(V)end
+if framecount%3~=0 then for cb in all(projectiles)do if cb.deltav then draw_minimap_ship(cb)end end
+for Y in all(npcships)do draw_minimap_ship(Y)end
+draw_minimap_ship(playership)end end
+print_shadowed("�"..#npcships,112,c9)end
+outlined_text_draw_points=split_number_string"2 2 1 2 0 2 2 0 2 1 1 1 -1 -1 1 -1 -1 1 -1 0 1 0 0 -1 0 1 "function print_shadowed(cc,g,l,cd,ce)local v=cd or 6
+local a=darkshipcolors[v]if ce then for e=1,#outlined_text_draw_points,2 do if e>10 then a=v end
+print(cc,g+outlined_text_draw_points[e],l+outlined_text_draw_points[e+1],a)end
+v=0 else print(cc,g+1,l+1,a)end
+print(cc,g,l,v)end
+local cf=nil
+local cg=4
+function notification_add(cc)cf=cc
+cg=4 end
+function notification_draw()if cg>0 then print_shadowed(cf,0,121)if framecount>=29 then 
+cg-=1
+ end end end
+function call_option(e)if current_option_callbacks[e]then local ch=current_option_callbacks[e]()paused=false
+if ch==nil then paused=true elseif ch then if type(ch)=="string"then notification_add(ch)end
 paused=true end end end
-function display_menu(ch,ci,cj)if ch then current_options=ch
-current_option_callbacks=ci end
-if not landed then render_game_screen()end
-local b1=Vector(64,90)local ck=b1+Vector(-1,2)for u=.25,1,.25 do local d=u*4
-local cl=6
-local cm=0
-if cj==d then cl=11 end
-local X=rotated_vector(u,8)+ck
-X:draw_line(rotated_vector(u,3)+ck,cl)X:draw_line(rotated_vector(u,5,2)+ck,cl)X:draw_line(rotated_vector(u,5,-2)+ck,cl)if current_options[d]then X=rotated_vector(u,14)+b1
-if u==.5 then X:add(Vector(-4*#current_options[d])) elseif u~=1 then X:add(Vector(round(-4*#current_options[d]/2)))end
-print_shadowed(current_options[d],X.x,X.y,cl,cm,true)end end end
-function main_menu()display_menu({"autopilot","fire missile","options","systems"},{function()display_menu({"full stop","planet","back","follow"},{function()playership:reset_orders(playership.full_stop)return false end,approach_nearest_planet,main_menu,function()playership:reset_orders(playership.seek)playership.seektime=0
-return false end})end,function()playership:fire_missile()return false end,function()display_menu({"back","starfield","minimap size","debug"},{main_menu,function()display_menu({"more stars","~dimming","less stars","~colors"},{function()
+function display_menu(ci,cj,ck)if cj then current_options=cj
+current_menu_colors=split_number_string(ci)current_option_callbacks=ck end
+for w=.25,1,.25 do local e=w*4
+local cl=current_menu_colors[e]if e==pressed then cl=darkshipcolors[cl]end
+if current_options[e]then local V=rotated_vector(w,15)+Vector(64,90)if w==.5 then V.x=V.x-4*#current_options[e] elseif w~=1 then V.x=V.x-round(4*#current_options[e]/2)end
+print_shadowed(current_options[e],V.x,V.y,cl,true)end end
+print_shadowed("  �  \n�  �\n  �",52,84,6,true)end
+function main_menu()display_menu("12 8 11 7 ",{"autopilot","fire missile","options","systems"},{function()display_menu("12 12 6 12 ",{"full stop","near planet","back","follow"},{function()playership:reset_orders(playership.full_stop)return false end,approach_nearest_planet,main_menu,function()if playership.target then playership:reset_orders(playership.seek)playership.seektime=0 end
+return false end})end,function()playership:fire_missile()return false end,function()display_menu("6 15 11 10 ",{"back","starfield","minimap size","debug"},{main_menu,function()display_menu("7 15 6 10 ",{"more stars","~dimming","less stars","~colors"},{function()
 starfield_count+=5
 return"star count: "..starfield_count end,function()star_color_index=(star_color_index+1)%2
 return true end,function()starfield_count=max(0,starfield_count-5)return"star count: "..starfield_count end,function()star_color_monochrome=(star_color_monochrome+1)%2*3
-return true end})end,function()setup_minimap((minimap_size_index+1)%#minimap_sizes)return true end,function()display_menu({"new ship","back","new sector","spawn enemy"},{function()s=max((s+1)%48,8)playership:generate_random_ship(s)return playership.ship_type.name.." "..s end,main_menu,load_sector,function()add_npc()npcships[#npcships].hostile=true
-return"npc created"end})end})end,function()display_menu({"target next hostile","back","land","target next"},{next_hostile_target,main_menu,land_at_nearest_planet,next_ship_target})end})end
-function landed_menu()display_menu({"takeoff"},{takeoff})end
-local cn=0
-local co={}for d=1,96 do co[d]={flr(-sqrt(-sin(d/193))*48+64)}co[d][2]=(64-co[d][1])*2 end
-for d=0,95 do poke(64*d+56,peek(64*d+0x1800))end
-local cp={}for d=0,15 do cp[d]={(cos(0.5+0.5/16*d)+1)/2}cp[d][2]=(cos(0.5+0.5/16*(d+1))+1)/2-cp[d][1]end
-function shift_sprite_sheet()for d=0,95 do poke(64*d+0x1838,peek(64*d))memcpy(64*d,64*d+1,56)memcpy(64*d+0x1800,64*d+0x1801,56)poke(64*d+56,peek(64*d+0x1800))end end
-function landed_update()local X=landed_planet
-if not landed_front_rendered then landed_front_rendered=X:render_a_bit_to_sprite_sheet(true)if landed_front_rendered then X.rendered_circle=false
-X.rendered_terrain=false
-for cq=1,56 do shift_sprite_sheet()end end else if not landed_back_rendered then landed_back_rendered=X:render_a_bit_to_sprite_sheet(true,true) else cn=1-cn
-if cn==0 then shift_sprite_sheet()end end end end
-function render_landed_screen()cls()if landed_front_rendered and landed_back_rendered then for d=1,96 do local u,v=co[d][1],co[d][2]pal()local cr=ceil(v*cp[15][2])for cq=15,0,-1 do if cq==4 then for cs=0,#dark_planet_colors-1 do pal(cs,dark_planet_colors[cs+1])end end
-if cq<15 then cr=flr(u+v*cp[cq+1][1])-flr(u+v*cp[cq][1])end
-sspr(cn+cq*7,d-1,7,1,flr(u+v*cp[cq][1]),d+16,cr,1)end end
-pal()print_shadowed("planet class: "..landed_planet.planet_type.class_name,1,1,7,5,true) else sspr(0,0,127,127,0,0)print_shadowed("mapping surface...",1,1,7,5,true)end end
-s=8
+return true end})end,function()setup_minimap((minimap_size_index+1)%#minimap_sizes)return true end,function()display_menu("12 6 9 8 ",{"new ship","back","new sector","spawn enemy"},{function()playership:generate_random_ship()return playership.ship_type.name.." "..playership.sprite_rows end,main_menu,load_sector,function()add_npc()npcships[#npcships].hostile=true
+npcships[#npcships].target=playership
+return"npc created"end})end})end,function()display_menu("8 6 12 11 ",{"target next hostile","back","land","target next"},{next_hostile_target,main_menu,land_at_nearest_planet,next_ship_target})end})end
+function landed_menu()display_menu("12 11 6 6 ",{"takeoff","repair"},{takeoff,function()playership:generate_random_ship(playership.seed_value)notification_add("hull damage repaired")return"hull damage repaired"end})end
+local cm=0
+local cn={}for e=1,96 do cn[e]={flr(-sqrt(-sin(e/193))*48+64)}cn[e][2]=(64-cn[e][1])*2 end
+for e=0,95 do poke(64*e+56,peek(64*e+0x1800))end
+local co={}for e=0,15 do co[e]={(cos(0.5+0.5/16*e)+1)/2}co[e][2]=(cos(0.5+0.5/16*(e+1))+1)/2-co[e][1]end
+function shift_sprite_sheet()for e=0,95 do poke(64*e+0x1838,peek(64*e))memcpy(64*e,64*e+1,56)memcpy(64*e+0x1800,64*e+0x1801,56)poke(64*e+56,peek(64*e+0x1800))end end
+function landed_update()local V=landed_planet
+if not landed_front_rendered then landed_front_rendered=V:render_a_bit_to_sprite_sheet(true)if landed_front_rendered then V.rendered_circle=false
+V.rendered_terrain=false
+for cp=1,56 do shift_sprite_sheet()end end else if not landed_back_rendered then landed_back_rendered=V:render_a_bit_to_sprite_sheet(true,true) else cm=1-cm
+if cm==0 then shift_sprite_sheet()end end end end
+function render_landed_screen()cls()if landed_front_rendered and landed_back_rendered then for e=1,96 do local w,x=cn[e][1],cn[e][2]pal()local cq=ceil(x*co[15][2])for cp=15,0,-1 do if cp==4 then for cr=0,#dark_planet_colors-1 do pal(cr,dark_planet_colors[cr+1])end end
+if cp<15 then cq=flr(w+x*co[cp+1][1])-flr(w+x*co[cp][1])end
+sspr(cm+cp*7,e-1,7,1,flr(w+x*co[cp][1]),e+16,cq,1)end end
+pal()print_shadowed("planet class: "..landed_planet.planet_type.class_name,1,1) else sspr(0,0,127,127,0,0)print_shadowed("mapping surface...",1,1,6,true)end end
 framecount=0
 secondcount=0
-function _update()framecount=(framecount+1)%30
+local cs=split_number_string"2 0 3 1 "function _update()framecount=(framecount+1)%30
 if framecount==0 then 
 secondcount+=1
  end
 if not landed and btnp(4,0)then paused=not paused
-if paused then main_menu()end end
+if paused then main_menu()end
+pressed=nil end
 if landed then landed_update()end
-if paused or landed then if btnp(2)then call_option(1)end
-if btnp(0)then call_option(2)end
-if btnp(3)then call_option(3)end
-if btnp(1)then call_option(4)end else if btn(0,0)then playership:turn_left()end
+if paused or landed then for e=1,4 do if btn(cs[e])then pressed=e end
+if pressed then if pressed==e and not btn(cs[e])then pressed=nil
+call_option(e)end end end else if btn(0,0)then playership:turn_left()end
 if btn(1,0)then playership:turn_right()end
 if btn(3,0)then playership:reverse_direction()end
 if btn(5,0)then playership:fire_weapon()end
-if btn(2,0)then playership:apply_thrust()if playership.current_deltav<playership.deltav then camera(random_int(2)-1,random_int(2)-1) else camera()end else if playership.accelerating and not playership.orders[1]then camera()playership:cut_thrust()end end
-for _ in all(npcships)do if _.last_hit_time and _.last_hit_time+30>secondcount then _:reset_orders()_:flee()if _.hostile then _.target=_.last_hit_attacking_ship
-_.target_index=_.target.index end else if#_.orders==0 then if _.hostile then _.seektime=0
-if not _.target then next_ship_target(_,true)end
-add(_.orders,_.seek) else _:approach_object()_.wait_duration=random_int(46,10)_.wait_time=secondcount
-add(_.orders,_.wait)end end
-_:follow_current_order()end
-_:update_location()if _.hp<1 then del(npcships,_)playership:clear_target()end end
+if btn(2,0)then playership:apply_thrust() else if playership.accelerating and not playership.orders[1]then playership:cut_thrust()end end
+for a8 in all(projectiles)do a8:update(playership.velocity_vector)end
+for Y in all(npcships)do if Y.last_hit_time and Y.last_hit_time+30>secondcount then Y:reset_orders()Y:flee()if Y.hostile then Y.target=Y.last_hit_attacking_ship
+Y.target_index=Y.target.index end else if#Y.orders==0 then if Y.hostile then Y.seektime=0
+if not Y.target then next_ship_target(Y,true)end
+add(Y.orders,Y.seek) else Y:approach_object()Y.wait_duration=random_int(46,10)Y.wait_time=secondcount
+add(Y.orders,Y.wait)end end
+Y:follow_current_order()end
+Y:update_location()if Y.hp<1 then del(npcships,Y)playership:clear_target()end end
 playership:follow_current_order()playership:update_location()thissector:scroll_starfield(playership.velocity_vector)end end
 function render_game_screen()cls()thissector:draw_starfield(playership.velocity_vector)for ct in all(thissector.planets)do ct:draw(playership.sector_position)end
-for _ in all(npcships)do if _:is_visible(playership.sector_position)then _:draw_sprite_rotated()end end
+for Y in all(npcships)do if Y:is_visible(playership.sector_position)then Y:draw_sprite_rotated()end end
 if playership.target then last_offscreen_pos=nil
 local cu=playership.screen_position
 local cv=playership.target
-if cv then if not cv:is_visible(playership.sector_position)then local ar=format_float((cv.screen_position-cu):scaled_length())local color,cw=cv:targeted_color()local cx=flr(cv.sprite_rows*.5)local Y=rotated_vector((cv.screen_position-cu):angle())last_offscreen_pos=Y*(60-cx)+screen_center
-local b8=last_offscreen_pos:clone():add(Vector(-4*#ar/2))cv:draw_sprite_rotated(last_offscreen_pos)if b8.y>63 then b8:add(Vector(1,-12-cx)) else b8:add(Vector(1,7+cx))end
-print_shadowed(ar,round(b8.x),round(b8.y),color,cw)end
-print_shadowed("target "..cv:hp_string(),0,114)end end
+if cv then if not cv:is_visible(playership.sector_position)then local ar=""..flr((cv.screen_position-cu):scaled_length())local m,cw=cv:targeted_color()local cx=flr(cv.sprite_rows*.5)local W=rotated_vector((cv.screen_position-cu):angle())last_offscreen_pos=W*(60-cx)+screen_center
+local b9=last_offscreen_pos:clone():add(Vector(-4*#ar/2))cv:draw_sprite_rotated(last_offscreen_pos)if b9.y>63 then b9:add(Vector(1,-12-cx)) else b9:add(Vector(1,7+cx))end
+print_shadowed(ar,round(b9.x),round(b9.y),m)end
+print_shadowed("target�"..cv:hp_string(),0,114,cv:hp_color())end end
 if playership.hp<1 then playership:generate_random_ship()end
-playership:draw()for cy in all(particles)do if is_offscreen(cy,32)then del(particles,cy) else cy:draw(playership.velocity_vector)end end
-for aa in all(projectiles)do if is_offscreen(aa,63)then del(projectiles,aa) else if last_offscreen_pos and aa.sector_position and playership.target and(playership.target.sector_position-aa.sector_position):scaled_length()<=playership.target.sprite_rows then aa:draw(nil,aa.sector_position-playership.target.sector_position+last_offscreen_pos) else aa:draw(playership.velocity_vector)end end end
-draw_minimap()notifications:draw()end
-function _draw()if landed then render_landed_screen()display_menu() elseif not paused then render_game_screen()end end
+playership:draw()for cy in all(particles)do if is_offscreen(cy,32)then del(particles,cy) else if paused then cy:draw(Vector()) else cy:draw(playership.velocity_vector)end end end
+for a8 in all(projectiles)do if is_offscreen(a8,63)then del(projectiles,a8) else if last_offscreen_pos and a8.sector_position and playership.target and(playership.target.sector_position-a8.sector_position):scaled_length()<=playership.target.sprite_rows then a8:draw(nil,a8.sector_position-playership.target.sector_position+last_offscreen_pos) else a8:draw(playership.velocity_vector)end end end
+draw_minimap()end
+function _draw()if landed then render_landed_screen() else render_game_screen()end
+if paused or landed then display_menu()end
+notification_draw()end
