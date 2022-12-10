@@ -2,7 +2,8 @@
 
 2D space exploration and combat on the [Pico-8](http://www.lexaloffle.com/pico-8.php).
 
-## [Play Here](https://anthonydigirolamo.github.io/heliopause.pico-8/)
+- **BBS Thread**: https://www.lexaloffle.com/bbs/?tid=28203
+- **Web Player**: https://anthonydigirolamo.github.io/heliopause.pico-8/
 
 ## Screenshots
 
