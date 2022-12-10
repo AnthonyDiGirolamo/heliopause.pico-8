@@ -10,4 +10,4 @@
 # awk 'BEGIN{flag=1}/^$/{flag=0;next}flag' ../heliopause.p8 > pico8-header
 # awk '/__gfx__/{flag=1}flag' ../heliopause.p8 > pico8-footer
 # cat pico8-header heliopause.lua pico8-footer > heliopause.p8
-cat minified/heliopause.html-header heliopause.js minified/heliopause.html-footer > heliopause.html
+# cat minified/heliopause.html-header heliopause.js minified/heliopause.html-footer > heliopause.html
