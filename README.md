@@ -20,25 +20,47 @@
 ## Features
 
 - [x] Simple 2D Newtonian Flight Model
-- [x] Configurable starfield graphics
 - [x] Procedurally generated ships
 - [x] Procedurally generated planets
 - [x] 3D planet rotation [(courtesy of gamax92)](http://www.lexaloffle.com/bbs/?tid=3140)
 - [x] Simple autopilot
 - [x] Multicannons
 - [x] Explosions
-- [x] Pretty dumb AI
-- [ ] Better AI
-- [ ] Sound Effects
-- [ ] Music
+- [x] Ok AI
 - [x] Title screen [(courtesy of EatMoreCheese)](http://www.lexaloffle.com/bbs/?pid=33820#p33820)
 - [x] Homing missiles
-- [x] Offscreen targeting and missile impacts
-- [ ] Better token optimization
-- [ ] More planet types
+- [x] Off-screen targeting and missile impacts
+- [x] Better token optimization
+- [x] More planet types
+- [x] Shipyards
+- [x] Dogfights
+- [x] Sound Effects
+- [x] Music
+- [x] Gamepad, Mouse, or stylus control styles
+- [x] Configurable starfield graphics
 - [ ] Inventory with items and more weapons
-- [ ] Shipyards?
 - [ ] Save games?
-- [ ] Story?
 
-I'm looking for help with any of the above, let me know if you'd like to contribute! The game currently uses 7188/8192 tokens but most of the above should fit.
+## Controls
+
+(change style in options > mouse+music > control mode)
+
+### Gamepad
+
+- left, right - turn ship
+- up - thrust forward
+- down - point in the opposite direction of movement
+- z - open and close the pause/ship menu (use arrow keys to make selections]
+- x - fire weapon
+
+### Mouse
+
+- Ship will rotate to face mouse cursor
+- right click thrusts forward
+- left click shoots
+
+### Stylus (PocketChip)
+
+- Tap and hold near the ship will rotate
+- Tap and hold far from the ship will thrust in that direction
+
