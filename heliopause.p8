@@ -664,6 +664,17 @@ function ship:apply_thrust(max_velocity)
   self.velocity_vector = velocity_vector
 end
 
+function ship:dampen_speed()
+  if self.velocity < 1.2 * self.deltav then
+    self:reset_velocity()
+  else
+    local cvn = self.velocity_vector:clone()
+    cvn:normalize()
+    self.velocity_vector += cvn * -0.3 * self.deltav
+    self.velocity = self.velocity_vector:length()
+  end
+end
+
 function ship:reverse_direction()
   if self.velocity > 0 then
     return self:rotate_towards_heading(self.velocity_angle_opposite)
@@ -1773,6 +1784,8 @@ function _update()
     else
       if pilot.accelerating and no_orders then
         pilot:cut_thrust()
+      else
+        pilot:dampen_speed()
       end
     end
 
