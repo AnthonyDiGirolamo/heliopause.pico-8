@@ -28,6 +28,11 @@ function object:__call(...)
 end
 
 function split(s)
+  -- split a string into an array
+  -- first char changes modes
+  -- a: strings
+  -- n: decimal numbers
+  -- x: hex numbers
   local t, start_index, ti = {}, 2, split_start or 0
   local mode = sub(s, 1, 1)
   for i = 2, #s do
@@ -53,6 +58,8 @@ function split(s)
 end
 
 function nsplit(s)
+  -- split a string into an array of arrays
+  -- arrays are terminated by |
   local t, start_index, ti = {}, 1, split_start or 0
   for i = 1, #s do
     if sub(s, i, i) == "|" then
@@ -1325,9 +1332,11 @@ function _init()
   grads3 =
     nsplit "n1,1,0,|n-1,1,0,|n1,-1,0,|n-1,-1,0,|n1,0,1,|n-1,0,1,|n1,0,-1,|n-1,0,-1,|n0,1,1,|n0,-1,1,|n0,1,-1,|n0,-1,-1,|"
   mmap_sizes = split "n24,48,128,0,"
-  music_tracks = split "n13,0,-1,"
+  music_tracks = split "n-1,13,0,"
+  music_track_labels = split "aoff,track 1,track 2,"
   mousemodes = split "agamepad,two button mouse,stylus (pocketchip),"
   framecount, secondcount, mousemode, mmap_size_index, music_track = 0, 0, 0, 0, 0
+  next_music_track()
   split_start = 1
   btnv = split "x2031"
   ijks = nsplit "n1,0,0,1,1,0,|n1,0,0,1,0,1,|n0,0,1,1,0,1,|n0,0,1,0,1,1,|n0,1,0,0,1,1,|n0,1,0,1,1,0,|"
@@ -1561,6 +1570,14 @@ function menu(coptions, callbacks)
   text("  ⬆️  \n⬅️  ➡️\n  ⬇️",52,84,6,true)
 end
 
+function next_music_track()
+  music_track+=1
+  music_track%=3
+  menuitem(1, "music: "..music_track_labels[music_track], next_music_track)
+  music(music_tracks[music_track])
+  return true
+end
+
 function main_menu()
   menu("xc8b7|aautopilot,fire missile,options,system,|", {
     function()
@@ -1617,11 +1634,7 @@ function main_menu()
               mousemode+=1
               mousemode%=3
               note_add(mousemodes[mousemode])
-            end, main_menu, function()
-              music_track+=1
-              music_track%=3
-              music(music_tracks[music_track])
-            end
+            end, main_menu, next_music_track
           })
         end
       })
